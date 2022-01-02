@@ -123,6 +123,7 @@ X[, img := sprintf('<img src="img/BCRC%s.png" class="img_html">', asset_number)]
 X[, img := sprintf('<a href="%s" target="_blank">%s</br>#%s</a>', link, img, asset_number)]
 
 X <- X[, .(rank_range, img, price, asset_rank, asset_rarity, sc, market, asset_traits_num, asset_traits)]
+X <- X[complete.cases(X)]
 
 datatable(X, class = 'dt-right compact stripe hover',
           options = list(pageLength = 100,
@@ -137,6 +138,7 @@ datatable(X, class = 'dt-right compact stripe hover',
   formatStyle(columns = 1:ncol(X), fontSize = '90%')
 ```
 
+> Tip: Click on the image to be open the listing.
 
 ### Listings stats by rank range
 ```{r}
@@ -153,6 +155,7 @@ X <- DT[, .(num_assets = .N,
 
 .cols <- names(X)[!(names(X) %like% "_range")]
 X[, (.cols) := lapply(.SD, function(x) sprintf("%.f", x)), .SDcols = .cols]
+X <- X[complete.cases(X)]
 
 datatable(X, class = 'dt-right compact stripe hover',
           options = list(pageLength = 100,
@@ -234,6 +237,7 @@ X[, img := sprintf('<img src="img/BCRC%s.png" class="img_html">', asset_number)]
 X[, img := sprintf('<a href="%s" target="_blank">%s</br>#%s</a>', link, img, asset_number)]
 
 X <- X[, .(rarity_range, img, price, asset_rank, asset_rarity, sc, market, asset_traits_num, asset_traits)]
+X <- X[complete.cases(X)]
 
 datatable(X, class = 'dt-right compact stripe hover',
           options = list(pageLength = 100,
@@ -265,6 +269,7 @@ X <- DT[, .(num_assets = .N,
 
 .cols <- names(X)[!(names(X) %like% "_range")]
 X[, (.cols) := lapply(.SD, function(x) sprintf("%.f", x)), .SDcols = .cols]
+X <- X[complete.cases(X)]
 
 datatable(X, class = 'dt-right compact stripe hover',
           options = list(pageLength = 100,
@@ -297,6 +302,7 @@ X <- X[, .(trait_category, trait, img, price, asset_rank, asset_rarity,
            sc, market, asset_traits_num, asset_traits)]
 
 X <- X[order(trait_category, trait)]
+X <- X[complete.cases(X)]
 
 datatable(X, class = 'dt-right compact stripe hover',
           options = list(pageLength = 100,
@@ -328,6 +334,7 @@ X <- DTL[, .(num_assets = .N,
 
 .cols <- names(X)[!(names(X) %like% "trait")]
 X[, (.cols) := lapply(.SD, function(x) sprintf("%.f", x)), .SDcols = .cols]
+X <- X[complete.cases(X)]
 
 datatable(X, class = 'dt-right compact stripe hover',
           options = list(pageLength = 100,
