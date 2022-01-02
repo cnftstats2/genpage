@@ -1,9 +1,8 @@
-# Hourly scraping
 name: buildDashboardBCRC
 
 on:
   schedule:
-    - cron:  "*/10 * * * *"
+    - cron:  "5,20,35,50 * * * *"
   workflow_dispatch:
     
 jobs: 
@@ -101,4 +100,4 @@ jobs:
         destination_repo: 'cnftstats/cnftstats.github.io'
         user_email: 'github_k2@outlook.com'
         user_name: 'githubktwoo'
-        commit_message: 'Commiting files'
+        commit_message: 'k2'
