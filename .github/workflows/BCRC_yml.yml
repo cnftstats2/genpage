@@ -11,7 +11,7 @@ name: buildDashboardBCRC
 #  # Allows you to run this workflow manually from the Actions tab
 on:
   schedule:
-    - cron:  "*/5 * * * *"
+    - cron:  "5 * * * *"
   workflow_dispatch:
     
 jobs: 
@@ -107,6 +107,6 @@ jobs:
       with:
         source_file: 'index.html'
         destination_repo: 'cnftstats/cnftstats.github.io'
-        user_email: 'mathias.schmitz@uclouvain.be'
-        user_name: 'cnftstats'
+        user_email: 'github_k2@outlook.com'
+        user_name: 'githubktwoo'
         commit_message: 'Commiting files'
