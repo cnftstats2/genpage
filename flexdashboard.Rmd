@@ -351,10 +351,11 @@ datatable(X, class = 'dt-right compact stripe hover',
   formatStyle(columns = 1:ncol(X), fontSize = '90%')
 ```
 
-# My BCRC rank/rarity
-## Column 1 {data-icon="ion-help-circled"}
+# My BCRC rank/rarity {data-icon="ion-help-circled"}
+## Column 1
 ### Find your BCRC rank and rarity
 ```{r}
+# ion-information-circled
 X <- RAR[, .(asset_name = paste0("Boss Cat Rocket Club #", asset_number), asset_rank, asset_rarity)]
 datatable(X, class = 'dt-right compact stripe hover',
           options = list(pageLength = 50,
@@ -393,10 +394,6 @@ Any tips would be greatly appreciated! This will also help me to improve the web
 #### Disclaimer
 - This is an early version, so there might be some bugs! Use at your own risk.
 
-### About myself
-- I am passionate about crypto, (c)nfts, stats, and programming!
-- Hit me on discord: <a href="https://discord.com/users/K2#8332/" target="_blank">K2#8332</a>
-
 ## Columun 2
 ### Resources
 - <a href="https://bosscatrocketclub.com/" target="_blank">Boss Cat Rocket Club official website/ranking</a>.
@@ -413,3 +410,7 @@ ggplot(RAR, aes(asset_rank, asset_rarity)) +
 ### Changelog
 #### Version 1.0
 - This is the first version of this website! More to come soon.
+
+### About myself
+- I am passionate about crypto, (c)nfts, stats, and programming!
+- Hit me on discord: <a href="https://discord.com/users/K2#8332/" target="_blank">K2#8332</a>
