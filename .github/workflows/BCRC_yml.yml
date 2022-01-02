@@ -48,7 +48,7 @@ jobs:
         git add data/DT.rds
         git add data/DTL.rds
         git commit -am "Data updated $(date)"
-        git push origin
+        git push origin --force
       env:
         REPO_KEY: ${{secrets.GITHUB_TOKEN}}
         username: github-actions
@@ -68,21 +68,6 @@ jobs:
       env:
         REPO_KEY: ${{secrets.GITHUB_TOKEN}}
         username: github-actions
-
-  # htmlToRepo:
-  #   needs: createDashboard
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - name: Commit html files to remote repository (cnftstats)
-  #     uses: cpina/github-action-push-to-another-repository@main
-  #     env:
-  #       API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
-  #     with:
-  #       source-directory: 'html'
-  #       destination-github-username: 'cnftstats'
-  #       destination-repository-name: 'cnftstats.github.io'
-  #       user-email: mathias.schmitz@uclouvain.be
-  #       target-branch: main
 
   htmlToRepo:
     needs: createDashboard
