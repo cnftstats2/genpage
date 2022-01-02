@@ -1,0 +1,112 @@
+# Hourly scraping
+name: buildDashboardBCRC
+
+# Controls when the action will run.
+#on:
+#  # Triggers the workflow on push or pull request events but only for the master branch
+#  push:
+#    branches: [ master ]
+#  pull_request:
+#    branches: [ master ]
+#  # Allows you to run this workflow manually from the Actions tab
+on:
+  schedule:
+    - cron:  "*/5 * * * *"
+  workflow_dispatch:
+    
+jobs: 
+  createDashboard:
+    # The type of runner that the job will run on
+    runs-on: macOS-latest
+
+    # Load repo and install R
+    steps:
+    - uses: actions/checkout@master
+    - uses: r-lib/actions/setup-r@master
+      with:
+         r-version: '4.1.2'
+    - uses: r-lib/actions/setup-pandoc@v1
+
+    - name: Cache R packages
+      id: cache
+      uses: actions/cache@v2
+      with:
+        path: ${{ env.R_LIBS_USER }}
+        key: ${{ runner.os }}-shinydoc
+        restore-keys: |
+          ${{ runner.os }}-
+    
+    # Remove the if statement the first time you run it!
+    - name: Install packages
+      # if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        install.packages(c("data.table", "httr", "jsonlite", "rvest", "flexdashboard",
+        "htmlwidgets", "magrittr", "ggplot2", "svglite", "plotly", "tidyr", "DT"))
+      shell: Rscript {0}
+        
+    - name: Run gather_clean_data.
+      run: |
+        source('gather_clean_data.R')
+      shell: Rscript {0}
+      
+    # Add new files in data folder, commit along with other modified files, push
+    - name: Commit files data
+      run: |
+        git config --local user.name actions-user
+        git config --local user.email "actions@github.com"
+        git add data/DT.rds
+        git add data/DTL.rds
+        git commit -am "Data updated $(date)"
+        git push origin
+      env:
+        REPO_KEY: ${{secrets.GITHUB_TOKEN}}
+        username: github-actions
+    
+    - name: Build flexdashboard
+      run: |
+        rmarkdown::render('flexdashboard.Rmd', output_file = 'index.html')
+      shell: Rscript {0}
+
+    - name: Commit dashboard file to current repository
+      run: |
+        git config --local user.name actions-user
+        git config --local user.email "actions@github.com"
+        git add index.html
+        git commit -am "Html file created $(date)"
+        git push origin
+      env:
+        REPO_KEY: ${{secrets.GITHUB_TOKEN}}
+        username: github-actions
+
+  # htmlToRepo:
+  #   needs: createDashboard
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Commit html files to remote repository (cnftstats)
+  #     uses: cpina/github-action-push-to-another-repository@main
+  #     env:
+  #       API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+  #     with:
+  #       source-directory: 'html'
+  #       destination-github-username: 'cnftstats'
+  #       destination-repository-name: 'cnftstats.github.io'
+  #       user-email: mathias.schmitz@uclouvain.be
+  #       target-branch: main
+
+  htmlToRepo:
+    needs: createDashboard
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Commit html files to remote repository (cnftstats)
+      uses: dmnemec/copy_file_to_another_repo_action@main
+      env:
+        API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+      with:
+        source_file: 'index.html'
+        destination_repo: 'cnftstats/cnftstats.github.io'
+        user_email: 'mathias.schmitz@uclouvain.be'
+        user_name: 'cnftstats'
+        commit_message: 'Commiting files'
