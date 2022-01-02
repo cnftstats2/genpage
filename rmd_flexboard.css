@@ -40,17 +40,43 @@ table.dataTable thead th {
 }
 
 /* TIP ME */
-#navbar > ul.nav.navbar-nav.navbar-left > li:nth-child(5) > a {
-  animation: color-change 25s infinite;
-}
 
-@keyframes color-change {
-  0% { color: #ffffff; }
-  25% { color: #ffffff; }
-  50% { color: rgba(40, 40, 135, 0.8); }
-  75% { color: #ffffff; }
-  100% { color: #ffffff; }
+/*
+#navbar > ul.nav.navbar-nav.navbar-left > li:nth-child(5) > a {
+  -webkit-animation: text-shadow 25s infinite;
+  -moz-animation: text-shadow 25s infinite;
+  -o-animation: text-shadow 25s infinite;
+  animation: text-shadow 25s infinite;
 }
+@-webkit-keyframes text-shadow {
+  0% { text-shadow: none; }
+  25% { text-shadow: none; }
+  50% { text-shadow: 0 0 15px yellow; }
+  75% { text-shadow: none; }
+  100% { text-shadow: none; }
+}
+@-moz-keyframes text-shadow {
+  0% { text-shadow: none; }
+  25% { text-shadow: none; }
+  50% { text-shadow: 0 0 15px yellow; }
+  75% { text-shadow: none; }
+  100% { text-shadow: none; }
+}
+@-o-keyframes text-shadow {
+  0% { text-shadow: none; }
+  25% { text-shadow: none; }
+  50% { text-shadow: 0 0 15px yellow; }
+  75% { text-shadow: none; }
+  100% { text-shadow: none; }
+}
+@keyframes text-shadow {
+  0% { text-shadow: none; }
+  25% { text-shadow: none; }
+  50% { text-shadow: 0 0 15px yellow; }
+  75% { text-shadow: none; }
+  100% { text-shadow: none; }
+}
+*/
 
 /* IMAGES */
 .img_html {
