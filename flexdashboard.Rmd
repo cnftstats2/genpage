@@ -74,7 +74,7 @@ gg <- ggplot(X, aes(asset_rank, price, shape = sc, customdata = link,
   geom_point(color = "steelblue4", alpha = .6) +
   scale_x_reverse(breaks = scale_x, expand = c(0.03, 0)) +
   scale_y_continuous(breaks = scale_y) +
-  labs(x = "Rank", y = "Price", color = "Market", shape = "Smart contract") +
+  labs(x = "Rank", y = "Listing price", color = "Market", shape = "Smart contract") +
   theme(legend.title = element_text(size = 10))
 
 ggplotly(gg, tooltip = "text") %>% 
@@ -83,7 +83,7 @@ ggplotly(gg, tooltip = "text") %>%
   onRender(js)
 ```
 
-> Only offers below 6000 ada are displayed. Click on the legend to display/hide hide smart contracts. Click on datapoints to open the marketplace offer.
+> Only listings below 6000 ada are displayed. Try click on the legend or datapoints.
 
 ### Log scale
 ```{r}
@@ -104,7 +104,7 @@ gg <- ggplot(X, aes(asset_rank, price, shape = sc, customdata = link,
   geom_point(color = "steelblue4", alpha = .6) +
   scale_x_reverse(breaks = scale_x, expand = c(0.03, 0)) +
   scale_y_continuous(breaks = scale_y, trans = "log2") +
-  labs(x = "Rank", y = "Price (log)", color = "Market", shape = "Smart contract") +
+  labs(x = "Rank", y = "Listing price (log)", color = "Market", shape = "Smart contract") +
   theme(legend.title = element_text(size = 10))
 
 ggplotly(gg, tooltip = "text") %>% 
@@ -113,10 +113,10 @@ ggplotly(gg, tooltip = "text") %>%
   onRender(js)
 ```
 
-> Only offers below 6000 ada are displayed. Click on the legend to display/hide hide smart contracts. Click on datapoints to open the marketplace offer.
+> Only listings below 6000 ada are displayed. Try click on the legend or datapoints.
 
 ## Column 2 {data-width=500, .tabset}
-### Cheapest offers by rank range
+### Cheapest listings by rank range
 ```{r}
 X <- DT[, .SD[price == min(price)], rank_range][order(rank_range)]
 X[, img := sprintf('<img src="img/BCRC%s.png" class="img_html">', asset_number)]
@@ -138,7 +138,7 @@ datatable(X, class = 'dt-right compact stripe hover',
 ```
 
 
-### Offers stats by rank range
+### Listings stats by rank range
 ```{r}
 X <- DT[, .(num_assets = .N,
             min_price = min(price),
@@ -168,7 +168,7 @@ datatable(X, class = 'dt-right compact stripe hover',
   formatStyle(columns = 1:ncol(X), fontSize = '90%')
 ```
 
-> `Q` = Quantiles. For instance, `Q05%` means that only 5% of the offers are equal or below that price.
+> `Q` = Quantiles. For instance, `Q05%` means that only 5% of the listings prices are equal or below that price.
 
 # Rarity {data-icon="ion-star"}
 ## Column 1 {data-width=500, .tabset}
@@ -188,7 +188,7 @@ gg <- ggplot(X, aes(asset_rarity, price, shape = sc, customdata = link,
   geom_point(color = "steelblue4", alpha = .6) +
   scale_x_continuous(breaks = scale_x, expand = c(0.03, 0)) +
   scale_y_continuous(breaks = scale_y) +
-  labs(x = "Rarity", y = "Price", color = "Market", shape = "Smart contract") +
+  labs(x = "Rarity", y = "Listing price", color = "Market", shape = "Smart contract") +
   theme(legend.title = element_text(size = 10))
 
 ggplotly(gg, tooltip = "text") %>% 
@@ -197,7 +197,7 @@ ggplotly(gg, tooltip = "text") %>%
   onRender(js)
 ```
 
-> Only offers below 6000 ada are displayed. Click on the legend to display/hide hide smart contracts. Click on datapoints to open the marketplace offer.
+> Only listings below 6000 ada are displayed. Try click on the legend or datapoints.
 
 ### Log scale
 ```{r}
@@ -215,7 +215,7 @@ gg <- ggplot(X, aes(asset_rarity, price, shape = sc, customdata = link,
   geom_point(color = "steelblue4", alpha = .6) +
   scale_x_continuous(breaks = scale_x, expand = c(0.03, 0)) +
   scale_y_continuous(breaks = scale_y, trans = "log2") +
-  labs(x = "Rarity", y = "Price", color = "Market", shape = "Smart contract") +
+  labs(x = "Rarity", y = "Listing price (log)", color = "Market", shape = "Smart contract") +
   theme(legend.title = element_text(size = 10))
 
 ggplotly(gg, tooltip = "text") %>% 
@@ -224,10 +224,10 @@ ggplotly(gg, tooltip = "text") %>%
   onRender(js)
 ```
 
-> Only offers below 6000 ada are displayed. Click on the legend to display/hide hide smart contracts. Click on datapoints to open the marketplace offer.
+> Only listings below 6000 ada are displayed. Try click on the legend or datapoints.
 
 ## Column 2 {data-width=500, .tabset}
-### Cheapest offers by rarity range
+### Cheapest listings by rarity range
 ```{r}
 X <- DT[, .SD[price == min(price)], rarity_range][order(-rarity_range)]
 X[, img := sprintf('<img src="img/BCRC%s.png" class="img_html">', asset_number)]
@@ -248,9 +248,9 @@ datatable(X, class = 'dt-right compact stripe hover',
   formatStyle(columns = 1:ncol(X), fontSize = '90%')
 ```
 
-> Tip: Click on the image to be open the marketplace website with the offer.
+> Tip: Click on the image to be open the listing.
 
-### Offers stats by rarity range
+### Listings stats by rarity range
 ```{r}
 X <- DT[, .(num_assets = .N,
             min_price = min(price),
@@ -280,11 +280,11 @@ datatable(X, class = 'dt-right compact stripe hover',
   formatStyle(columns = 1:ncol(X), fontSize = '90%')
 ```
 
-> `Q` = Quantiles. For instance, `Q05%` means that only 5% of the offers are equal or below that price.
+> `Q` = Quantiles. For instance, `Q05%` means that only 5% of the listings prices are equal or below that price.
 
 # Traits {data-icon="ion-android-color-palette"}
 ## Column 1 {data-width=400, .tabset}
-### Cheapest offers by trait
+### Cheapest listings by trait
 ```{r}
 X <- DTL[, .SD[price == min(price)], trait][order(trait)]
 X[, img := asset_number]
@@ -311,7 +311,7 @@ datatable(X, class = 'dt-right compact stripe hover',
   formatStyle(columns = 1:ncol(X), fontSize = '90%')
 ```
 
-### Offers stats by trait
+### Listings stats by trait
 ```{r}
 X <- DTL[, .(num_assets = .N,
              min_rank = min(asset_rank),
@@ -361,12 +361,12 @@ datatable(X, class = 'dt-right compact stripe hover',
   formatStyle(columns = 1:ncol(X), fontSize = '90%')
 ```
 
-> Use the search box to loof for your BCRC. For example, search `#3000`.
+> Use the search box to look for your BCRC. For example, search `#3000`.
 
 # Buy me a coffee {data-icon="ion-coffee"}
 ## Column 1
 ### Thanks for your support!
-If you want to support the effort I put on this website, any tip would be greatly appreciated!  
+Any tips would be greatly appreciated! This will also help me to improve the website (for instance, to get a better hosting service).  
 
 ![Tip me](tipme.png)  
 **addr1qx04gwr9kazlpnm6t8a8h0pggk440zs3fdayct732a0wwwd3usryhnh52pevj5xy7cgp9d4jnywar6g0tnct58dyfukszl25n8**
@@ -376,23 +376,23 @@ If you want to support the effort I put on this website, any tip would be greatl
 ## Columun 1
 ### About the website
 #### The data
-- Sales data is extracted from <a href="https://cnft.io/" target="_blank">cnft.io</a> and <a href="https://www.jpg.store/" target="_blank">jpg.store</a> marketplaces.
-- Cnft images, rank, and rarity scores are extracted from <a href="https://bosscatrocketclub.com/" target="_blank">bosscatrocketclub.com</a>.
-- The website is updated every ~30mins. This will be improved in the future. You need to hit `F5` to manually see the updates on the website.
+- Listings data is comes from <a href="https://cnft.io/" target="_blank">cnft.io</a> and <a href="https://www.jpg.store/" target="_blank">jpg.store</a> marketplaces.
+- Rank and rarity scores come from from <a href="https://bosscatrocketclub.com/" target="_blank">bosscatrocketclub.com</a>.
+- The website is updated every ~20mins. This will be improved in the future. You need to hit `F5` to manually see the updates on the website.
 
 #### Comming soon
-- Only the *offers* (the data from the marketplaces) are currently analysed, but I plan also to integrate the *sales* (the data from <a href="https://opencnft.io/" target="_blank">opencnft.io</a>).
+- Only the *listings* are currently analyzed, but the *sales* will be soon included.
 
 #### Disclaimer
-- Please note that this is an early version, so there might be some bugs! Use at your own risk.
+- This is an early version, so there might be some bugs! Use at your own risk.
 
 ### About myself
 - I am passionate about crypto, (c)nfts, stats, and programming!
-- Contact me on discord: <a href="https://discord.com/users/K2#8332/" target="_blank">K2#8332</a>
+- Hit me on discord: <a href="https://discord.com/users/K2#8332/" target="_blank">K2#8332</a>
 
 ## Columun 2
 ### Resources
-- Find your BCRC ranking and rarity score on <a href="https://bosscatrocketclub.com/ranking/" target="_blank">bosscatrocketclub.com/ranking</a>.
+- <a href="https://bosscatrocketclub.com/" target="_blank">Boss Cat Rocket Club official website/ranking</a>.
 - Is rarity the same as rank? No. As you can see from the figure below, the relation between rank and rarity is quite stable below rank 1000, then rarity drastically increases above rank ~1000.  
 ```{r fig.height=4, fig.width=4, fig.align='left'}
 ggplot(RAR, aes(asset_rank, asset_rarity)) +
@@ -405,4 +405,4 @@ ggplot(RAR, aes(asset_rank, asset_rarity)) +
 ## Column 3
 ### Changelog
 #### Version 1.0
-- This is the first version of this website!
+- This is the first version of this website! More to come soon.
