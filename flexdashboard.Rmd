@@ -7,7 +7,8 @@ output:
     vertical_layout: fill
     navbar:
       - { title: "About", href: "#about" }
-    # social: ["menu"]
+      - { title: "Follow me on Twitter", href: "https://twitter.com/cnftstats"}
+    social: ["menu"]
     css: rmd_flexboard.css
     self_contained: yes
     includes:
@@ -378,7 +379,8 @@ Any tips would be greatly appreciated! This will also help me to improve the web
 
 ![Tip me](tipme.png)  
 **addr1qx04gwr9kazlpnm6t8a8h0pggk440zs3fdayct732a0wwwd3usryhnh52pevj5xy7cgp9d4jnywar6g0tnct58dyfukszl25n8**
-
+  
+You can also support me by spreading the word about this website to the CNFT community! :-)  
 
 # about {.hidden}
 ## Columun 1
@@ -411,6 +413,7 @@ ggplot(RAR, aes(asset_rank, asset_rarity)) +
 #### Version 1.0
 - This is the first version of this website! More to come soon.
 
-### About myself
+### About me
 - I am passionate about crypto, (c)nfts, stats, and programming!
 - Hit me on discord: <a href="https://discord.com/users/K2#8332/" target="_blank">K2#8332</a>
+- Follow me on Twitter: <a href="https://twitter.com/cnftstats" target="_blank">@cnftstats</a>
