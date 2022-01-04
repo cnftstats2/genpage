@@ -359,14 +359,11 @@ datatable(X, class = 'dt-right compact stripe hover',
 # ion-information-circled
 X <- RAR[, .(asset_name = paste0("Boss Cat Rocket Club #", asset_number), asset_rank, asset_rarity)]
 datatable(X, class = 'dt-right compact stripe hover',
-          options = list(
-            pageLength = 30,
-            scrollY = '100%',
-            bLengthChange = FALSE,
-            bPaginate = TRUE,
-            info = TRUE,
-            autoWidth = TRUE,
-            columnDefs = list(list(width = '100px', targets = c(1, 3)))),
+          options = list(pageLength = 30,
+                         scrollY = '100%',
+                         bLengthChange = FALSE,
+                         bPaginate = TRUE,
+                         info = TRUE),
           colnames = c("Asset", "Rank", "Rarity"),
           rownames = FALSE,
           escape = FALSE) %>%
@@ -382,7 +379,7 @@ Any tips would be greatly appreciated! This will also help me to improve the web
 
 ![Tip me](tipme.png)  
 **addr1qx04gwr9kazlpnm6t8a8h0pggk440zs3fdayct732a0wwwd3usryhnh52pevj5xy7cgp9d4jnywar6g0tnct58dyfukszl25n8**
-
+  
 You can also support me by spreading the word about this website to the CNFT community! :-)  
 
 # about {.hidden}
