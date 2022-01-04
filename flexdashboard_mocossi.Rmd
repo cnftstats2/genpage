@@ -55,8 +55,8 @@ loj <- function (X = NULL, Y = NULL, onCol = NULL) {
 
 # Sidebar {data-width=70, .sidebar}
 <ul id="sidebar_ul">
-  <li><a href="index.html">BCRC</a></li>
-  <li><a href="#">Mocossi</a></li>
+  <li><a href="https://cnftstats.github.io/html/bcrc.html">BCRC</a></li>
+  <li><a href="https://cnftstats.github.io/html/mocossi.html">Mocossi</a></li>
 </ul>
   
 
