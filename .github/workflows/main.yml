@@ -1,0 +1,80 @@
+name: buildDashboard
+
+on:
+  schedule:
+    - cron:  "10,25,40,55 * * * *" # cnftstats
+    # - cron:  "5,20,35,50 * * * *"  # githubktwoo
+    # - cron:  "0,15,30,45 * * * *"  # Paykoman
+    # - cron:  "13,28,43,58 * * * *" # bosscatrock
+  workflow_dispatch:
+    
+jobs: 
+  genDashboard:
+    # The type of runner that the job will run on
+    runs-on: macOS-latest
+
+    # Load repo and install R
+    steps:
+    - uses: actions/checkout@master
+    - uses: r-lib/actions/setup-r@master
+      with:
+         r-version: '4.1.2'
+    - uses: r-lib/actions/setup-pandoc@v1
+
+    - name: Cache R packages
+      id: cache
+      uses: actions/cache@v2
+      with:
+        path: ${{ env.R_LIBS_USER }}
+        key: ${{ runner.os }}-shinydoc
+        restore-keys: |
+          ${{ runner.os }}-
+    
+    # Remove the if statement the first time you run it!
+    - name: Install packages
+      # if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        install.packages(c("data.table", "httr", "jsonlite", "rvest", "flexdashboard",
+        "htmlwidgets", "magrittr", "ggplot2", "plotly", "tidyr", "DT"))
+      shell: Rscript {0}
+        
+    - name: Run R scripts BCRC
+      run: |
+        source('gather_clean_data_bcrc.R')
+        rmarkdown::render('flexdashboard_bcrc.Rmd', output_file = 'html/bcrc.html')
+      shell: Rscript {0}
+      
+    - name: Run R scripts Mocossi
+      run: |
+        source('gather_clean_data_mocossi.R')
+        rmarkdown::render('flexdashboard_mocossi.Rmd', output_file = 'html/mocossi.html')
+      shell: Rscript {0}
+      
+    - name: Push html to current repository
+      run: |
+        git config --local user.name actions-user
+        git config --local user.email "actions@github.com"
+        git add html/bcrc.html html/mocossi.html
+        git commit -am "Html file created $(date)"
+        git push origin
+      env:
+        REPO_KEY: ${{secrets.GITHUB_TOKEN}}
+        username: github-actions
+
+  htmlToRepo:
+    needs: genDashboard
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Copy
+      uses: andstor/copycat-action@v3
+      with:
+        personal_token: ${{ secrets.API_TOKEN_GITHUB }}
+        src_path: html/
+        src_branch: main
+        dst_path: /.
+        dst_branch: main
+        dst_owner: cnftstats
+        dst_repo_name: cnftstats.github.io
