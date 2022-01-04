@@ -125,7 +125,7 @@ ggplotly(gg, tooltip = "text") %>%
 ### Cheapest listings by rank range
 ```{r}
 X <- DT[, .SD[price == min(price)], rank_range][order(rank_range)]
-X[, img := sprintf('<img src="img/mocossi/mocossi%s.png" class="img_html">', asset_number)]
+X[, img := sprintf('<img src="../img/mocossi/mocossi%s.png" class="img_html">', asset_number)]
 X[, img := sprintf('<a href="%s" target="_blank">%s</br>#%s</a>', link, img, asset_number)]
 
 X <- X[, .(rank_range, img, price, asset_rank, asset_rarity, sc, market, asset_traits_num, asset_traits)]
@@ -239,7 +239,7 @@ ggplotly(gg, tooltip = "text") %>%
 ### Cheapest listings by rarity range
 ```{r}
 X <- DT[, .SD[price == min(price)], rarity_range][order(-rarity_range)]
-X[, img := sprintf('<img src="img/mocossi/mocossi%s.png" class="img_html">', asset_number)]
+X[, img := sprintf('<img src="../img/mocossi/mocossi%s.png" class="img_html">', asset_number)]
 X[, img := sprintf('<a href="%s" target="_blank">%s</br>#%s</a>', link, img, asset_number)]
 
 X <- X[, .(rarity_range, img, price, asset_rank, asset_rarity, sc, market, asset_traits_num, asset_traits)]
@@ -301,7 +301,7 @@ datatable(X, class = 'dt-right compact stripe hover',
 <!-- X <- DTL[, .SD[price == min(price)], trait][order(trait)] -->
 <!-- X[, img := asset_number] -->
 <!-- X[, img := sprintf( -->
-<!--   '<img src="img/mocossi/mocossi%s.png" class="img_html">', img -->
+<!--   '<img src="../img/mocossi/mocossi%s.png" class="img_html">', img -->
 <!-- )] -->
 <!-- X[, img := sprintf('<a href="%s" target="_blank">%s</br>#%s</a>', link, img, asset_number)] -->
 
