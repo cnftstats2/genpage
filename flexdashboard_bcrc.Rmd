@@ -420,7 +420,7 @@ You can also support this project by spreading the word about it to the CNFT com
 
 Tips would also be greatly appreciated! This would encourage me to maintain and improve the website (for instance, to get a better hosting service).  
 
-![Tip me](../tipme.png)  
+![Tip me](tipme.png)  
 **addr1qx04gwr9kazlpnm6t8a8h0pggk440zs3fdayct732a0wwwd3usryhnh52pevj5xy7cgp9d4jnywar6g0tnct58dyfukszl25n8** 
 
 # about {.hidden}
