@@ -53,42 +53,41 @@ table.dataTable thead th {
 
 /* TIP ME */
 
-/*
-#navbar > ul.nav.navbar-nav.navbar-left > li:nth-child(5) > a {
-  -webkit-animation: text-shadow 25s infinite;
-  -moz-animation: text-shadow 25s infinite;
-  -o-animation: text-shadow 25s infinite;
-  animation: text-shadow 25s infinite;
+#navbar > ul.nav.navbar-nav.navbar-left > li:nth-child(6) > a {
+  -webkit-animation: color 30s infinite;
+  -moz-animation: color 30s infinite;
+  -o-animation: color 30s infinite;
+  animation: color 30s infinite;
 }
-@-webkit-keyframes text-shadow {
-  0% { text-shadow: none; }
-  25% { text-shadow: none; }
-  50% { text-shadow: 0 0 15px yellow; }
-  75% { text-shadow: none; }
-  100% { text-shadow: none; }
+@-webkit-keyframes color {
+  0% { color: white; }
+  30% { color: white; }
+  50% { color: rgba(255, 0, 0, .5); }
+  70% { color: white; }
+  100% { color: white; }
 }
-@-moz-keyframes text-shadow {
-  0% { text-shadow: none; }
-  25% { text-shadow: none; }
-  50% { text-shadow: 0 0 15px yellow; }
-  75% { text-shadow: none; }
-  100% { text-shadow: none; }
+@-moz-keyframes color {
+  0% { color: white; }
+  30% { color: white; }
+  50% { color: rgba(255, 0, 0, .5); }
+  70% { color: white; }
+  100% { color: white; }
 }
-@-o-keyframes text-shadow {
-  0% { text-shadow: none; }
-  25% { text-shadow: none; }
-  50% { text-shadow: 0 0 15px yellow; }
-  75% { text-shadow: none; }
-  100% { text-shadow: none; }
+@-o-keyframes color {
+  0% { color: white; }
+  30% { color: white; }
+  50% { color: rgba(255, 0, 0, .5); }
+  70% { color: white; }
+  100% { color: white; }
 }
-@keyframes text-shadow {
-  0% { text-shadow: none; }
-  25% { text-shadow: none; }
-  50% { text-shadow: 0 0 15px yellow; }
-  75% { text-shadow: none; }
-  100% { text-shadow: none; }
+@keyframes color {
+  0% { color: white; }
+  30% { color: white; }
+  50% { color: rgba(255, 0, 0, .5); }
+  70% { color: white; }
+  100% { color: white; }
 }
-*/
+
 
 /* IMAGES */
 .img_html {
