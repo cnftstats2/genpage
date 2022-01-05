@@ -324,7 +324,9 @@ ggplot(X, aes(x_label, N, fill = market)) +
   scale_fill_manual(values = c("jpg.store" = "steelblue3", "cnft.io" = "steelblue4")) +
   labs(x = "Price range", y = "Number of listings", fill = "Market") +
   theme_minimal() +
-  theme(axis.text.x=element_text(angle = -45, vjust = +.5, hjust = 0))
+  theme(axis.text.x = element_text(angle = -45, vjust = +.5, hjust = 0,
+                                   color = "grey50", size = 9),
+        axis.text.y = element_text(color = "grey50", size = 9))
 ```
 
 # Traits {data-icon="ion-android-color-palette"}
