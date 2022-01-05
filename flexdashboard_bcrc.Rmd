@@ -34,6 +34,8 @@ DTL <- readRDS("data/DTL.rds")
 RAR <- readRDS("data/RAR_bcrc.rds")
 traits <- readRDS("data/traits_bcrc.rds")
 
+img_link <- "https://raw.githubusercontent.com/cnftstats/images/main/bcrc/BCRC"
+
 # javascript (clickable datapoints url)
 # https://stackoverflow.com/questions/51681079/how-to-make-scatterplot-points-open-a-hyperlink-using-ggplotly-r
 
@@ -58,7 +60,47 @@ loj <- function (X = NULL, Y = NULL, onCol = NULL) {
 <ul id="sidebar_ul">
 <li><a href="https://cnftstats.github.io/html/bcrc.html">BCRC</a></li>
 <li><a href="https://cnftstats.github.io/html/mocossi.html">Mocossi</a></li>
+<li><a href="https://cnftstats.github.io/html/sac.html">SpaceApe</a></li>
 </ul>
+
+# Sweep the floor {data-icon="ion-arrow-graph-up-right"}
+## Column 1
+### Price distribution
+```{r fig.width=11}
+X <- copy(DT)
+X[price %between% c(0, 999), price_range := trunc(price/50)*50]
+X[price %between% c(1000, 1999), price_range := trunc(price/200)*200]
+X[price %between% c(2000, 4999), price_range := trunc(price/500)*500]
+X[price %between% c(5000, 9999), price_range := trunc(price/2000)*2000]
+X[price >= 10000, price_range := 10000]
+X <- X[complete.cases(price_range), .(price_range, market)]
+X <- X[, .N, .(price_range, market)][order(price_range)]
+X[price_range %between% c(0, 999),     x_label := paste0(price_range, "-", price_range + (50-1))]
+X[price_range %between% c(1000, 1999), x_label := paste0(price_range, "-", price_range + (200-1))]
+X[price_range %between% c(2000, 4999), x_label := paste0(price_range, "-", price_range + (500-1))]
+X[price_range %between% c(5000, 9999), x_label := paste0(price_range, "-", price_range + (2000-1))]
+X[price_range > 9999,                  x_label := "10000+"]
+
+.X <- X[, .(price_range, x_label)] %>% unique %>% .[order(price_range)]
+X[, x_label := factor(x_label, levels = .X$x_label)]
+X[, market := factor(market, levels = c("jpg.store", "cnft.io"))]
+
+ggplot(X, aes(x_label, N, fill = market)) +
+  geom_bar(stat = "identity", alpha = .8) +
+  geom_text(aes(label = stat(y), group = x_label),
+            stat = 'summary', fun = sum, vjust = -.5, hjust = +.55,
+            color = "steelblue4", size = 3) +
+  scale_fill_manual(values = c("jpg.store" = "steelblue3", "cnft.io" = "steelblue4")) +
+  labs(x = "Price range", y = "Number of listings", fill = "",
+       caption = sprintf("Floor: %d ada", min(DT$price))) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = -45, vjust = +.5, hjust = 0,
+                                   color = "grey50", size = 8),
+        axis.text.y = element_text(color = "grey50", size = 8),
+        legend.position = "top", legend.justification = 'left', legend.direction = "horizontal",
+        legend.text = element_text(color = "grey50", size = 8),
+        plot.caption = element_text(color = "#008B8B", vjust = +9, hjust = 0, size = 11))
+```
 
 # Rank {data-icon="fa-signal"}
 ## Column 1 {data-width=500, .tabset}
@@ -125,7 +167,7 @@ ggplotly(gg, tooltip = "text") %>%
 ### Floor listings by rank range
 ```{r}
 X <- DT[, .SD[price == min(price)], rank_range][order(rank_range)]
-X[, img := sprintf('<img src="../img/bcrc/BCRC%s.png" class="img_html">', asset_number)]
+X[, img := sprintf('<img src="%s%d.png" class="img_html">', img_link, asset_number)]
 X[, img := sprintf('<a href="%s" target="_blank">%s</br>#%s</a>', link, img, asset_number)]
 
 X <- X[, .(rank_range, img, price, asset_rank, asset_rarity, sc, market, asset_traits_num, asset_traits)]
@@ -239,7 +281,7 @@ ggplotly(gg, tooltip = "text") %>%
 ### Floor listings by rarity range
 ```{r}
 X <- DT[, .SD[price == min(price)], rarity_range][order(-rarity_range)]
-X[, img := sprintf('<img src="../img/bcrc/BCRC%s.png" class="img_html">', asset_number)]
+X[, img := sprintf('<img src="%s%d.png" class="img_html">', img_link, asset_number)]
 X[, img := sprintf('<a href="%s" target="_blank">%s</br>#%s</a>', link, img, asset_number)]
 
 X <- X[, .(rarity_range, img, price, asset_rank, asset_rarity, sc, market, asset_traits_num, asset_traits)]
@@ -293,51 +335,12 @@ datatable(X, class = 'dt-right compact stripe hover',
 
 > `Q` = Quantiles. For instance, `Q05%` means that only 5% of the listings prices are equal or below that price.
 
-# Sweep the floor {data-icon="ion-arrow-graph-up-right"}
-## Column 1 {data-width=400}
-### Price distribution
-```{r}
-X <- copy(DT)
-X[price %between% c(0, 999), price_range := trunc(price/50)*50]
-X[price %between% c(1000, 1999), price_range := trunc(price/200)*200]
-X[price %between% c(2000, 4999), price_range := trunc(price/500)*500]
-X[price %between% c(5000, 9999), price_range := trunc(price/2000)*2000]
-X[price >= 10000, price_range := 10000]
-X <- X[complete.cases(price_range), .(price_range, market)]
-X <- X[, .N, .(price_range, market)][order(price_range)]
-X[price_range %between% c(0, 999),     x_label := paste0(price_range, "-", price_range + (50-1))]
-X[price_range %between% c(1000, 1999), x_label := paste0(price_range, "-", price_range + (200-1))]
-X[price_range %between% c(2000, 4999), x_label := paste0(price_range, "-", price_range + (500-1))]
-X[price_range %between% c(5000, 9999), x_label := paste0(price_range, "-", price_range + (2000-1))]
-X[price_range > 9999,                  x_label := "10000+"]
-
-.X <- X[, .(price_range, x_label)] %>% unique %>% .[order(price_range)]
-X[, x_label := factor(x_label, levels = .X$x_label)]
-X[, market := factor(market, levels = c("jpg.store", "cnft.io"))]
-
-ggplot(X, aes(x_label, N, fill = market)) +
-  geom_bar(stat = "identity", alpha = .8) +
-  geom_text(aes(label = stat(y), group = x_label),
-            stat = 'summary', fun = sum, vjust = -.5, hjust = +.55,
-            color = "steelblue4", size = 3) +
-  scale_fill_manual(values = c("jpg.store" = "steelblue3", "cnft.io" = "steelblue4")) +
-  labs(x = "Price range", y = "Number of listings", fill = "Market") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = -45, vjust = +.5, hjust = 0,
-                                   color = "grey50", size = 9),
-        axis.text.y = element_text(color = "grey50", size = 9))
-```
-
-
 # Traits {data-icon="ion-android-color-palette"}
 ## Column 1 {data-width=400, .tabset}
 ### Floor listings by trait
 ```{r}
 X <- DTL[, .SD[price == min(price)], trait][order(trait)]
-X[, img := asset_number]
-X[, img := sprintf(
-  '<img src="../img/bcrc/BCRC%s.png" class="img_html">', img
-)]
+X[, img := sprintf('<img src="%s%d.png" class="img_html">', img_link, asset_number)]
 X[, img := sprintf('<a href="%s" target="_blank">%s</br>#%s</a>', link, img, asset_number)]
 
 X <- X[, .(trait_category, trait, img, price, asset_rank, asset_rarity,
@@ -416,7 +419,7 @@ datatable(X, class = 'dt-right compact stripe hover',
 # Support this project {data-icon="ion-heart"}
 ## Column 1
 ### Thanks for your support!
-You can also support this project by spreading the word about it to the CNFT community! :-)
+You can support this project by spreading the word about it to the CNFT community! :-)
 
 Tips would also be greatly appreciated! This would encourage me to maintain and improve the website (for instance, to get a better hosting service).  
 
@@ -428,7 +431,7 @@ Tips would also be greatly appreciated! This would encourage me to maintain and 
 ### About the website
 #### The data
 - Listings data is comes from <a href="https://cnft.io/" target="_blank">cnft.io</a> and <a href="https://www.jpg.store/" target="_blank">jpg.store</a> marketplaces.
-- Rank and rarity scores come from from <a href="https://bosscatrocketclub.com/" target="_blank">bosscatrocketclub.com</a>.
+- Rank and rarity scores come from <a href="https://bosscatrocketclub.com/" target="_blank">bosscatrocketclub.com</a>.
 - The website is updated every ~10mins. You need to hit `F5` to manually see the updates on the website.
 
 #### Comming soon
@@ -454,6 +457,8 @@ Tips would also be greatly appreciated! This would encourage me to maintain and 
 - Improvements on how often the website updates
 #### Version 1.2
 - Sweep floor section added
+#### Version 1.3
+- Added the Space Ape Club project
 ### About me
 - I am passionate about crypto, (c)nfts, stats, and programming!
 - Hit me on discord: <a href="https://discord.com/users/K2#8332/" target="_blank">K2#8332</a>

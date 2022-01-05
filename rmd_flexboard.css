@@ -25,6 +25,7 @@ table.dataTable thead th {
 
 #sidebar_ul a {
   color: rgb(75, 120, 162);
+  font-size: 13px;
 }
 
 #sidebar_ul a:hover {

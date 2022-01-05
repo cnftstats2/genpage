@@ -4,9 +4,9 @@ library(jsonlite)
 library(tidyr)
 library(httr)
 
-RAR <- readRDS("data/RAR_mocossi.rds")
+RAR <- readRDS("data/RAR_sac.rds")
 
-policy_id <- "5d5b205252b9f5016422d0eace869d7fd45074a4ea4b6c1dc78d1705"
+policy_id <- "ee6da4b71e0913cbebec02edc23653f9b970af69324fdddfed1285d9"
 
 # Functions
 loj <- function (X = NULL, Y = NULL, onCol = NULL) {
@@ -19,7 +19,7 @@ loj <- function (X = NULL, Y = NULL, onCol = NULL) {
 
 # Extract information from cnft.io -----------------------------------------------------------------
 api_link <- "https://api.cnft.io/market/listings"
-project <- "Mocossi"
+project <- "Space Ape Club - SAC Apes"
 
 query <- function(page, url, project) {
   httr::content(httr::POST(
@@ -54,10 +54,11 @@ query_all <- function(url, project) {
 
 CNFT <- query_all(api_link, project) |> lapply(data.table) |> rbindlist(fill = TRUE)
 
-CNFT <- CNFT[!(asset.metadata.name %like% "Christmas|Collectible")]
-CNFT[, asset        := gsub("Mocossi-Ito-", "Mocossi Ito #", asset.metadata.name)]
+CNFT <- CNFT[asset.policyId == policy_id]
+
+CNFT[, asset        := asset.metadata.name]
 CNFT[, link         := paste0("https://cnft.io/token/", X_id)]
-CNFT[, asset_number := as.numeric(gsub("Mocossi Ito #", "", asset))]
+CNFT[, asset_number := as.numeric(gsub("SpaceApe #", "", asset))]
 CNFT[, price        := price/10**6]
 CNFT[, sc           := ifelse(is.na(smartContractTxid), "no", "yes")]
 CNFT[, market       := "cnft.io"]
@@ -70,19 +71,21 @@ for (i in 1:nrow(CNFT)) {
 CNFT[type == "listing", last_offer := NA]
 
 CNFT[, asset_traits_raw := paste0(
-  "—", "Body_", asset.metadata.attributes.Body,
-  "—", "Species_", asset.metadata.attributes.Species,
-  "—", "Background_", asset.metadata.attributes.Background,
-  "—", "Face_", asset.metadata.attributes.Face,
-  "—", "Headwear_", asset.metadata.attributes.Headwear, "—"
+  "—", "Eyes_", asset.metadata.traits.Eyes,
+  "—", "FurColor_", asset.metadata.traits.Fur.Color,
+  "—", "SpaceSuit_", asset.metadata.traits.Space.Suit,
+  "—", "Mouth_", asset.metadata.traits.Mouth,
+  "—", "BackAccessory_", asset.metadata.traits.Back.Accessory,
+  "—", "NormalClothing_", asset.metadata.traits.Normal.Clothing, "—"
 )]
 
 CNFT[, asset_traits := paste0(
-  "Body:", asset.metadata.attributes.Body,
-  " — ", "Species:", asset.metadata.attributes.Species,
-  " — ", "Background:", asset.metadata.attributes.Background,
-  " — ", "Face:", asset.metadata.attributes.Face,
-  " — ", "Headwear:", asset.metadata.attributes.Headwear
+  "Eyes:", asset.metadata.traits.Eyes,
+  " — ", "FurColor:", asset.metadata.traits.Fur.Color,
+  " — ", "SpaceSuit:", asset.metadata.traits.Space.Suit,
+  " — ", "Mouth:", asset.metadata.traits.Mouth,
+  " — ", "BackAccessory:", asset.metadata.traits.Back.Accessory,
+  " — ", "NormalClothing:", asset.metadata.traits.Normal.Clothing
 )]
 
 CNFT <- CNFT[, .(asset, asset_number, type, price, last_offer, sc, market, link,
@@ -100,8 +103,8 @@ api_link <- sprintf("jpg.store/api/policy/%s/listings", policy_id)
 JPG <- data.table(fromJSON(rawToChar(GET(api_link)$content)))
 JPG[, link         := paste0("https://www.jpg.store/asset/", asset)]
 JPG[, price        := price_lovelace]
-JPG[, asset        := gsub("Mocossi-Ito-", "Mocossi Ito #", asset_display_name)]
-JPG[, asset_number := as.numeric(gsub("Mocossi Ito #", "", asset))]
+JPG[, asset        := asset_display_name]
+JPG[, asset_number := as.numeric(gsub("SpaceApe #", "", asset))]
 JPG[, price        := price/10**6]
 JPG[, sc           := "yes"]
 JPG[, market       := "jpg.store"]
@@ -147,29 +150,10 @@ DT[, rank_range := fcase(asset_rank %between% c(1, 100), "1-100",
                        "8001-9000",
                        "9001-9999"))]
 
-
-DT[, rarity_range := fcase(asset_rarity %between% c(10, 15), "10-15",
-                           asset_rarity %between% c(15.001, 20), "15-20",
-                           asset_rarity %between% c(20.001, 25), "20-25",
-                           asset_rarity %between% c(25.001, 30), "25-30",
-                           asset_rarity %between% c(30.001, 35), "30-35",
-                           asset_rarity %between% c(35.001, 40), "35-40",
-                           asset_rarity %between% c(40.001, 45), "40-45",
-                           asset_rarity %between% c(45.001, 50), "45-50",
-                           asset_rarity %between% c(50.001, 55), "50-55",
-                           asset_rarity %between% c(100.001, 120), "100-120",
-                           asset_rarity %between% c(737, 737), "737") %>% 
-     factor(levels = c("10-15",
-                       "15-20",
-                       "20-25",
-                       "25-30",
-                       "30-35",
-                       "35-40",
-                       "40-45",
-                       "45-50",
-                       "50-55",
-                       "100-120",
-                       "737"))]
+DT[, rarity_range := trunc(asset_rarity/50)*50]
+DT[, rarity_range := paste0(rarity_range, "-", rarity_range + (50-1))]
+.levels_order <- DT[order(asset_rarity), unique(rarity_range)]
+DT[, rarity_range := factor(rarity_range, levels = .levels_order)]
 
 
 # Large format -------------------------------------------------------------------------------------
