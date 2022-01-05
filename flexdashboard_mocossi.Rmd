@@ -12,7 +12,7 @@ output:
     css: ../rmd_flexboard.css
     self_contained: TRUE
     includes:
-      in_header: ../header.html
+      in_header: header.html
 ---
 
 ```{r setup, include=FALSE}
