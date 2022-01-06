@@ -132,7 +132,7 @@ datatable(X, class = 'compact stripe hover nowrap',
 ## Column 1 {data-width=500, .tabset}
 ### Linear scale
 ```{r}
-X <- DT[price < 6000]
+X <- DT[price <= 15000]
 scale_x <- c(seq(0, 2000, 250), seq(2500, 10000, 500))
 scale_x[scale_x == 0] <- 1
 scale_x[scale_x == 10000] <- 9999
@@ -147,7 +147,8 @@ gg <- ggplot(X, aes(asset_rank, price, shape = sc, customdata = link,
                                                       "</br>Sc:", sc)))) +
   geom_point(color = "steelblue4", alpha = .6) +
   scale_x_reverse(breaks = scale_x, expand = c(0.03, 0)) +
-  scale_y_continuous(breaks = scale_y) +
+  # scale_y_continuous(breaks = scale_y) +
+  scale_y_continuous(n.breaks = 15) +
   labs(x = "Rank", y = "Listing price", color = "Market", shape = "Smart contract") +
   theme(legend.title = element_text(size = 10))
 
@@ -157,15 +158,15 @@ ggplotly(gg, tooltip = "text") %>%
   onRender(js)
 ```
 
-> Only listings below 6000 ada are displayed. Try clicking on the legend or datapoints.
+> Only listings below 15000 ada are displayed. Try clicking on the legend or datapoints.
 
 ### Log scale
 ```{r}
-X <- DT[price < 6000]
+X <- DT[price <= 15000]
 scale_x <- c(seq(0, 2000, 250), seq(2500, 10000, 500))
 scale_x[scale_x == 0] <- 1
 scale_x[scale_x == 10000] <- 9999
-scale_y <- c(seq(0, 250, 25), seq(250, 500, 50), seq(500, 2000, 250), seq(2000, 6000, 500))
+# scale_y <- c(seq(0, 250, 25), seq(250, 500, 50), seq(500, 2000, 250), seq(2000, 6000, 500))
 
 gg <- ggplot(X, aes(asset_rank, price, shape = sc, customdata = link,
                     text = paste0(asset,
@@ -177,7 +178,8 @@ gg <- ggplot(X, aes(asset_rank, price, shape = sc, customdata = link,
                                                       "</br>Sc:", sc)))) +
   geom_point(color = "steelblue4", alpha = .6) +
   scale_x_reverse(breaks = scale_x, expand = c(0.03, 0)) +
-  scale_y_continuous(breaks = scale_y, trans = "log2") +
+  # scale_y_continuous(breaks = scale_y, trans = "log2") +
+  scale_y_continuous(n.breaks = 15, trans = "log2") +
   labs(x = "Rank", y = "Listing price (log)", color = "Market", shape = "Smart contract") +
   theme(legend.title = element_text(size = 10))
 
@@ -187,7 +189,7 @@ ggplotly(gg, tooltip = "text") %>%
   onRender(js)
 ```
 
-> Only listings below 6000 ada are displayed. Try clicking on the legend or datapoints.
+> Only listings below 15000 ada are displayed. Try clicking on the legend or datapoints.
 
 ## Column 2 {data-width=500, .tabset}
 ### Floor listings by rank range
