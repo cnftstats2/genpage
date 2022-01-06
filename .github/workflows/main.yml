@@ -52,12 +52,18 @@ jobs:
         source('gather_clean_data_sac.R')
         rmarkdown::render('flexdashboard_sac.Rmd', output_file = 'html/sac.html')
       shell: Rscript {0}
-      
+
+    - name: Run R scripts Chilled Kongs
+      run: |
+        source('gather_clean_data_chilledkongs.R')
+        rmarkdown::render('flexdashboard_chilledkongs.Rmd', output_file = 'html/chilledkongs.html')
+      shell: Rscript {0}
+
     - name: Push html to current repository
       run: |
         git config --local user.name actions-user
         git config --local user.email "actions@github.com"
-        git add html/bcrc.html html/mocossi.html html/sac.html
+        git add html/bcrc.html html/mocossi.html html/sac.html html/chilledkongs.html
         git commit -am "Html file created $(date)"
         git push origin
       env:
@@ -81,4 +87,3 @@ jobs:
         dst_branch: main
         dst_owner: cnftstats
         dst_repo_name: cnftstats.github.io
-
