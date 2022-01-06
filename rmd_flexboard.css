@@ -54,12 +54,13 @@ table.dataTable thead th {
 
 /* TIP ME */
 
-#navbar > ul.nav.navbar-nav.navbar-left > li:nth-child(6) > a {
+#navbar > ul.nav.navbar-nav.navbar-left > li:nth-child(5) > a {
   -webkit-animation: color 30s infinite;
   -moz-animation: color 30s infinite;
   -o-animation: color 30s infinite;
   animation: color 30s infinite;
 }
+
 @-webkit-keyframes color {
   0% { color: white; }
   30% { color: white; }
