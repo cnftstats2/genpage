@@ -64,5 +64,5 @@ jobs:
         target_branch: main
         files: html/bcrc.html html/mocossi.html html/sac.html html/chilledkongs.html
         remote_repository: https://github.com/cnftstats/cnftstats.github.io
-        access_token: ${{ secrets.ACCESS_TOKEN }}
+        access_token: ${{ secrets.API_TOKEN_GITHUB }}
         force: true
