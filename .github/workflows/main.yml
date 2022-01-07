@@ -47,40 +47,11 @@ jobs:
         rmarkdown::render('flexdashboard_bcrc.Rmd', output_file = 'html/bcrc.html')
       shell: Rscript {0}
 
-    - name: Push html to current repository
-      run: |
-        git config --local user.name actions-user
-        git config --local user.email "actions@github.com"
-        git add html/bcrc.html html/mocossi.html html/sac.html html/chilledkongs.html
-        git commit -am "Html file created $(date)"
-        git push origin
-      env:
-        REPO_KEY: ${{secrets.GITHUB_TOKEN}}
-        username: github-actions
-
-  htmlToRepo:
-    needs: genDashboard
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    - name: Copy
-      uses: andstor/copycat-action@v3
+    - name: Send files to cnftstats repo
+      uses: GuillaumeFalourd/git-commit-push@v1.3
       with:
-        personal_token: ${{ secrets.API_TOKEN_GITHUB }}
-        src_path: html/
-        src_branch: main
-        dst_path: /.
-        dst_branch: main
-        dst_owner: cnftstats
-        dst_repo_name: cnftstats.github.io
-
-    #- name: Send files to cnftstats repo
-    #  uses: GuillaumeFalourd/git-commit-push@v1.2
-    #  with:
-    #    target_branch: main
-    #    files: html/bcrc.html html/mocossi.html html/sac.html html/chilledkongs.html
-    #    remote_repository: https://github.com/cnftstats/cnftstats.github.io
-    #    access_token: ${{ secrets.API_TOKEN_GITHUB }}
-    #    force: true
+        target_branch: main
+        files: html/bcrc.html html/mocossi.html html/sac.html html/chilledkongs.html
+        remote_repository: https://github.com/cnftstats/cnftstats.github.io
+        access_token: ${{ secrets.API_TOKEN_GITHUB }}
+        force: true
