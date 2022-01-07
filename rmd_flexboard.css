@@ -12,6 +12,11 @@ table.dataTable thead th {
 
 }
 
+#currentProject, #currentProject:hover {
+  font-weight: bold !important;
+  background-color: rgba(104, 53, 129, 0.1) !important;
+}
+
 #sidebar {
   width: 80px !important;
   padding: 0;
@@ -39,8 +44,8 @@ table.dataTable thead th {
 }
 
 #sidebar_ul li:hover {
-  background-color: rgba(255, 255, 255, 0.4);
-  padding: 10px;
+  background-color: rgba(104, 53, 129, 0.1);
+  font-weight: bold !important;
 }
 
 .navbar-brand {
