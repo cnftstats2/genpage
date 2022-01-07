@@ -47,17 +47,7 @@ jobs:
         rmarkdown::render('flexdashboard_bcrc.Rmd', output_file = 'html/bcrc.html')
       shell: Rscript {0}
 
-    - name: Push html to current repository
-      run: |
-        git config --local user.name actions-user
-        git config --local user.email "actions@github.com"
-        git add html/bcrc.html html/mocossi.html html/sac.html html/chilledkongs.html
-        git commit -am "Html file created $(date)"
-        git push origin
-      env:
-        REPO_KEY: ${{secrets.GITHUB_TOKEN}}
-        username: github-actions
-      - name: Send files to cnftstats repo
+    - name: Send files to cnftstats repo
       uses: GuillaumeFalourd/git-commit-push@v1.2
       with:
         target_branch: main
