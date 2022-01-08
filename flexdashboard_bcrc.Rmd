@@ -379,7 +379,8 @@ X <- X[order(trait_category, trait, price)]
 X <- X[complete.cases(X)]
 
 datatable(X, class = 'compact stripe hover',
-          options = list(pageLength = 100,
+          options = list(dom = "t",
+                         pageLength = 100,
                          scrollY = '100%',
                          bLengthChange = FALSE,
                          bPaginate = FALSE,
@@ -387,6 +388,7 @@ datatable(X, class = 'compact stripe hover',
                          columnDefs = list(list(className = 'dt-right', targets = "_all"))),
           colnames = c("Trait</br>category", "Trait", "Asset", "Price", "Rank",  "Rarity", "Sc", "Market",
                        "Num.</br>traits", "Traits"),
+          filter = "top",
           rownames = FALSE,
           escape = FALSE) %>%
   formatStyle(columns = 1:ncol(X), fontSize = '90%')
