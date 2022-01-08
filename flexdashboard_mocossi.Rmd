@@ -102,9 +102,12 @@ ggplot(X, aes(x_label, N, fill = market)) +
   theme(axis.text.x = element_text(angle = -45, vjust = +.5, hjust = 0,
                                    color = "grey50", size = 8),
         axis.text.y = element_text(color = "grey50", size = 8),
-        legend.position = "top", legend.justification = 'left', legend.direction = "horizontal",
-        legend.text = element_text(color = "grey50", size = 8),
-        plot.caption = element_text(color = "#008B8B", vjust = +13, hjust = 0, size = 8),
+        axis.title = element_text(color = "grey30", size = 9),
+        legend.position = "bottom", legend.justification = 'right', legend.direction = "horizontal",
+        legend.text = element_text(color = "grey50", size = 9),
+        legend.key.height = unit(0.5, "points"), legend.key.width = unit(10, "points"),
+        legend.box.spacing = unit(-10, "points"),
+        plot.caption = element_text(color = "#008B8B", vjust = +17, hjust = 0, size = 8),
         plot.margin = unit(c(0, 15, 0, 0), units = "pt"))
 ```
 
