@@ -170,31 +170,14 @@ DTL <- data.table(gather(DT, raw_trait, has_trait, all_of(.cols)))
 DTL <- DTL[has_trait == 1]
 
 DTL[, trait_category := strsplit(raw_trait, "_")[[1]][1], 1:nrow(DTL)]
-DTL[, trait          := strsplit(raw_trait, "_")[[1]][2], 1:nrow(DTL)]
+DTL[, trait          := gsub(trait_category, "", raw_trait), 1:nrow(DTL)]
+DTL[, trait          := gsub("_", " ", trait), 1:nrow(DTL)]
+DTL[, trait          := gsub("^ ", "", trait), 1:nrow(DTL)]
+
+DTL[, trait_category_and_trait := paste0(trait_category, "_", trait)]
 
 
 # Save ---------------------------------------------------------------------------------------------
 saveRDS(DT, file = "data/DT.rds")
 saveRDS(DTL, file = "data/DTL.rds")
 
-
-# Task schedule ------------------------------------------------------------------------------------
-# taskscheduleR::taskscheduler_create(taskname = "BCRC_check",
-#                                     rscript = normalizePath(list.files(pattern = "main.R")),
-#                                     schedule = "MINUTE", modifier = 7)
-
-## Delete task
-# taskscheduleR::taskscheduler_delete(taskname = "BCRC_check")
-
-
-# Notification -------------------------------------------------------------------------------------
-# DT_latest <- fread("data/DT_latest.csv")
-# is_super_rare <- any(DT$index_rank_z > 3) # check is there very good deal
-# is_new <- DT_latest[1, asset] != DT[1, asset] # Check if asset is new
-# 
-# if(is_super_rare & is_new) {
-#   beepr::beep(2)
-#   DT[1, browseURL(link)]
-#   fwrite(DT, "data/DT_latest.csv")
-# }
-# https://towardsdatascience.com/effective-notification-mechanisms-in-r-82db9cb8816
