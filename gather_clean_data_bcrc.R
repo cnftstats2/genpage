@@ -1,5 +1,6 @@
 # Setup --------------------------------------------------------------------------------------------
 library(data.table)
+library(lubridate)
 library(jsonlite)
 library(tidyr)
 library(httr)
@@ -14,12 +15,13 @@ loj <- function (X = NULL, Y = NULL, onCol = NULL) {
   X[Y, `:=`((n), mget(paste0("i.", n))), on = onCol]
 }
 
+time_now <- as_datetime(now())
 
-# Extract information from cnft.io -----------------------------------------------------------------
-api_link <- "https://api.cnft.io/market/listings"
+# CNFT listings ------------------------------------------------------------------------------------
+api_link_cnft <- "https://api.cnft.io/market/listings"
 project <- "Boss Cat Rocket Club"
 
-query <- function(page, url, project) {
+query <- function(page, url, project, sold) {
   httr::content(httr::POST(
     url = url, 
     body = list(
@@ -32,25 +34,25 @@ query <- function(page, url, project) {
       page = page, 
       verified = TRUE, 
       nsfw = FALSE, 
-      sold = FALSE, 
+      sold = sold, 
       smartContract = NULL
     ), 
     encode = "json"
   ), simplifyVector = TRUE)
 }
 
-query_all <- function(url, project) {
-  n <- query(1L, url, project)[["count"]]
+query_n <- function(url, project, sold, n = "all") {
+  if (n == "all") n <- query(1L, url, project, sold)[["count"]]
   out <- vector("list", n)
   for (i in seq_len(n)) {
-    out[[i]] <- query(i, url, project)[["results"]]
-    if (length(out[[i]]) < 1L)
-      return(out[seq_len(i - 1L)])
+    out[[i]] <- query(i, url, project, sold)[["results"]]
+    if (length(out[[i]]) < 1L) return(out[seq_len(i - 1L)])
   }
   out
 }
 
-CNFT <- query_all(api_link, project) |> lapply(data.table) |> rbindlist(fill = TRUE)
+CNFT <- query_n(api_link_cnft, project, sold = FALSE) |>
+  lapply(data.table) |> rbindlist(fill = TRUE)
 
 CNFT[, asset        := asset.metadata.name]
 CNFT[, link         := paste0("https://cnft.io/token/", X_id)]
@@ -66,16 +68,30 @@ for (i in 1:nrow(CNFT)) {
 }
 CNFT[type == "listing", last_offer := NA]
 
-
 CNFT <- CNFT[, .(asset, asset_number, type, price, last_offer, sc, market, link)]
 
 
-# Extract information from jpg.store ---------------------------------------------------------------
+# CNFT sales ---------------------------------------------------------------------------------------
+CNFTS <- query_n(api_link_cnft, project, 11, sold = TRUE) |>
+  lapply(data.table) |> rbindlist(fill = TRUE)
+
+CNFTS[, asset         := asset.metadata.name]
+CNFTS[, asset_number  := as.numeric(gsub("Boss Cat Rocket Club #", "", asset))]
+CNFTS[, price         := price/10**6]
+CNFTS[, market        := "cnft.io"]
+CNFTS[, sold_at       := as_datetime(soldAt)]
+CNFTS[, sold_at_hours := difftime(as_datetime(now()), sold_at, units = "hours")]
+CNFTS[, sold_at_days  := difftime(as_datetime(now()), sold_at, units = "days")]
+
+CNFTS <- CNFTS[order(-sold_at), .(asset, asset_number, price, sold_at, sold_at_hours, 
+                                  sold_at_days, market)]
+CNFTS <- CNFTS[sold_at_hours <= 24*3]
+
+
+# JPG listings -------------------------------------------------------------------------------------
 # jpg.store/api/policy - all supported policies
 # jpg.store/api/policy/[id]/listings - listings for a given policy
 # jpg.store/api/policy/[id]/sales - sales for a given policy
-
-
 api_link <- "jpg.store/api/policy/c364930bd612f42e14d156e1c5410511e77f64cab8f2367a9df544d1/listings"
 
 JPG <- data.table(fromJSON(rawToChar(GET(api_link)$content)))
@@ -89,13 +105,40 @@ JPG[, market       := "jpg.store"]
 
 JPG <- JPG[, .(asset, asset_number, type = "listing", price, last_offer = NA, sc, market, link)]
 
-# Merge info
+
+# JPG sales ----------------------------------------------------------------------------------------
+api_link <- "jpg.store/api/policy/c364930bd612f42e14d156e1c5410511e77f64cab8f2367a9df544d1/sales"
+
+JPGS <- data.table(fromJSON(rawToChar(GET(api_link)$content)))
+JPGS[, price         := price_lovelace]
+JPGS[, asset         := asset_display_name]
+JPGS[, asset_number  := as.numeric(gsub("Boss Cat Rocket Club #", "", asset))]
+JPGS[, price         := price/10**6]
+JPGS[, market        := "jpg.store"]
+JPGS[, sold_at       := as_datetime(purchased_at)]
+JPGS[, sold_at_hours := difftime(as_datetime(now()), sold_at, units = "hours")]
+JPGS[, sold_at_days  := difftime(as_datetime(now()), sold_at, units = "days")]
+
+JPGS <- JPGS[order(-sold_at), .(asset, asset_number, price, sold_at, sold_at_hours,
+                                sold_at_days, market)]
+JPGS <- JPGS[sold_at_hours <= 24*3]
+
+
+# Merge markets data -------------------------------------------------------------------------------
+# Listings
 DT <- rbindlist(list(CNFT, JPG), fill = TRUE, use.names = TRUE)
+
+# Sales
+DTS <- rbindlist(list(CNFTS, JPGS), fill = TRUE, use.names = TRUE)
+
 
 
 # Rarity and ranking -------------------------------------------------------------------------------
 setDT(DT); setDT(RAR)
 loj(DT, RAR, "asset_number")
+
+setDT(DTS); setDT(RAR)
+loj(DTS, RAR, "asset_number")
 
 DT[, rank_range := fcase(asset_rank %between% c(1, 100), "1-100",
                          asset_rank %between% c(101, 250), "101-250",
@@ -128,40 +171,42 @@ DT[, rank_range := fcase(asset_rank %between% c(1, 100), "1-100",
                        "8001-9000",
                        "9001-9999"))]
 
-DT[, rarity_range := fcase(asset_rarity %between% c(70, 90), "70-90",
-                           asset_rarity %between% c(90.001, 110), "90-110",
-                           asset_rarity %between% c(110.001, 130), "110-130",
-                           asset_rarity %between% c(130.001, 150), "130-150",
-                           asset_rarity %between% c(150.001, 170), "150-170",
-                           asset_rarity %between% c(170.001, 190), "170-190",
-                           asset_rarity %between% c(190.001, 210), "190-210",
-                           asset_rarity %between% c(210.001, 230), "210-230",
-                           asset_rarity %between% c(230.001, 250), "230-250",
-                           asset_rarity %between% c(250.001, 270), "250-270",
-                           asset_rarity %between% c(270.001, 280), "270-280",
-                           asset_rarity %between% c(280.001, 290), "280-290",
-                           asset_rarity %between% c(290.001, 300), "290-300",
-                           asset_rarity %between% c(300.001, 310), "300-310",
-                           asset_rarity %between% c(310.001, 320), "310-320") %>% 
-     factor(levels = c("70-90",
-                       "90-110",
-                       "110-130",
-                       "130-150",
-                       "150-170",
-                       "170-190",
-                       "190-210",
-                       "210-230",
-                       "230-250",
-                       "250-270",
-                       "270-280",
-                       "280-290",
-                       "290-300",
-                       "300-310",
-                       "310-320"))]
+
+DTS[, rank_range := fcase(asset_rank %between% c(1, 100), "1-100",
+                          asset_rank %between% c(101, 250), "101-250",
+                          asset_rank %between% c(251, 500), "251-500",
+                          asset_rank %between% c(501, 750), "501-750",
+                          asset_rank %between% c(751, 1000), "751-1000",
+                          asset_rank %between% c(1001, 1500), "1001-1500",
+                          asset_rank %between% c(1501, 2000), "1501-2000",
+                          asset_rank %between% c(2001, 3000), "2001-3000",
+                          asset_rank %between% c(3001, 4000), "3001-4000",
+                          asset_rank %between% c(4001, 5000), "4001-5000",
+                          asset_rank %between% c(5001, 6000), "5001-6000",
+                          asset_rank %between% c(6001, 7000), "6001-7000",
+                          asset_rank %between% c(7001, 8000), "7001-8000",
+                          asset_rank %between% c(8001, 9000), "8001-9000",
+                          asset_rank %between% c(9001, 9999), "9001-9999") %>% 
+      factor(levels = c("1-100",
+                        "101-250",
+                        "251-500",
+                        "501-750",
+                        "751-1000",
+                        "1001-1500",
+                        "1501-2000",
+                        "2001-3000",
+                        "3001-4000",
+                        "4001-5000",
+                        "5001-6000",
+                        "6001-7000",
+                        "7001-8000",
+                        "8001-9000",
+                        "9001-9999"))]
 
 
 # Remove BRCR for which we do not have the rank/rarity score ---------------------------------------
 DT <- DT[!(asset_number %in% c(3097, 7210, 9535, 8114))]
+DTS <- DTS[!(asset_number %in% c(3097, 7210, 9535, 8114))]
 
 
 # Large format -------------------------------------------------------------------------------------
@@ -180,4 +225,12 @@ DTL[, trait_category_and_trait := paste0(trait_category, "_", trait)]
 # Save ---------------------------------------------------------------------------------------------
 saveRDS(DT, file = "data/DT.rds")
 saveRDS(DTL, file = "data/DTL.rds")
+saveRDS(DTS, file = "data/DTS.rds")
 
+
+# Database evolution -------------------------------------------------------------------------------
+# if (file.exists("data/DT_evo_bcr.rds")) {
+#   DT_evo_bcrc <- readRDS("data/DT_evo_bcr.rds")
+# } else {
+#   saveRDS(DT, file = "data/DT_evo_bcr.rds")
+# }
