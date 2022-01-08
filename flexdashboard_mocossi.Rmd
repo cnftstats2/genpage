@@ -56,7 +56,7 @@ loj <- function (X = NULL, Y = NULL, onCol = NULL) {
 }
 ```
 
-# Sidebar {data-width=70, .sidebar}
+# Sidebar {data-width=80, .sidebar}
 <ul id="sidebar_ul">
   <li><a href="https://cnftstats.github.io/bcrc.html">BCRC</a></li>
   <li><a href="https://cnftstats.github.io/chilledkongs.html">ChilledKongs</a></li>
@@ -193,7 +193,7 @@ ggplotly(gg, tooltip = "text") %>%
 
 > Only listings below 6000 ada are displayed. Try clicking on the legend or datapoints.
 
-## Column 2 {data-width=500, .tabset}
+## Column 2 {data-width=500}
 ### Floor listings by rank range
 ```{r}
 X <- DT[, .SD[price == min(price)], rank_range][order(rank_range)]
@@ -218,156 +218,6 @@ datatable(X, class = 'compact stripe hover',
 ```
 
 > Tip: Click on the image to open the listing.
-
-### Listings stats by rank range
-```{r}
-X <- DT[, .(num_assets = .N,
-            min_price = min(price),
-            quant_05_price = quantile(price, probs = .05, names = FALSE),
-            quant_10_price = quantile(price, probs = .10, names = FALSE),
-            quant_25_price = quantile(price, probs = .25, names = FALSE),
-            quant_50_price = quantile(price, probs = .50, names = FALSE),
-            quant_75_price = quantile(price, probs = .75, names = FALSE),
-            quant_90_price = quantile(price, probs = .90, names = FALSE),
-            quant_95_price = quantile(price, probs = .95, names = FALSE),
-            max_price = max(price)), rank_range][order(rank_range)]
-
-.cols <- names(X)[!(names(X) %like% "_range")]
-X[, (.cols) := lapply(.SD, function(x) sprintf("%.f", x)), .SDcols = .cols]
-X <- X[complete.cases(X)]
-
-datatable(X, class = 'compact stripe hover',
-          options = list(pageLength = 100,
-                         scrollY = '100%',
-                         bLengthChange = FALSE,
-                         bPaginate = FALSE,
-                         info = FALSE,
-                         columnDefs = list(list(className = 'dt-right', targets = "_all"))),
-          colnames = c("Stats</br>range", "Num.</br>offers", "Min.</br>price",
-                       "Price</br>Q5%", "Price</br>Q10%", "Price</br>Q25%", "Price</br>Q50%",
-                       "Price</br>Q75%", "Price</br>Q90%", "Price</br>Q95%", "Max.</br>price"),
-          rownames = FALSE,
-          escape = FALSE) %>%
-  formatStyle(columns = 1:ncol(X), fontSize = '90%')
-```
-
-> `Q` = Quantiles. For instance, `Q05%` means that only 5% of the listings prices are equal or below that price.
-
-<!-- # Rarity {data-icon="ion-star"} -->
-<!-- ## Column 1 {data-width=500, .tabset} -->
-<!-- ### Linear scale -->
-<!-- ```{r} -->
-<!-- X <- DT[price < 6000 & asset_rarity < 60] -->
-<!-- scale_x <- seq(10, 60, 5) -->
-<!-- scale_y <- c(seq(0, 2000, 250), seq(2000, 6000, 500)) -->
-<!-- gg <- ggplot(X, aes(asset_rarity, price, shape = sc, customdata = link, -->
-<!--                     text = paste0(asset, -->
-<!--                                   "</br></br>", paste("Price:", price, -->
-<!--                                                       "</br>Last offer:", last_offer, -->
-<!--                                                       "</br>Rank:", asset_rank, -->
-<!--                                                       "</br>Rarity:", asset_rarity, -->
-<!--                                                       "</br>Market:", market, -->
-<!--                                                       "</br>Sc:", sc)))) + -->
-<!--   geom_point(color = "steelblue4", alpha = .6) + -->
-<!--   scale_x_continuous(breaks = scale_x, expand = c(0.03, 0)) + -->
-<!--   scale_y_continuous(breaks = scale_y) + -->
-<!--   labs(x = "Rarity", y = "Listing price", color = "Market", shape = "Smart contract") + -->
-<!--   theme(legend.title = element_text(size = 10)) -->
-
-<!-- ggplotly(gg, tooltip = "text") %>%  -->
-<!--   layout(legend = list(x = .025, y = .97, bgcolor = 'rgba(255,255,255,0.6)'), -->
-<!--          xaxis = list(tickangle = 45)) %>% -->
-<!--   onRender(js) -->
-<!-- ``` -->
-
-<!-- > Only listings with price<6000 and rarity<60 are displayed. Try clicking on the legend or datapoints. -->
-
-<!-- ### Log scale -->
-<!-- ```{r} -->
-<!-- X <- DT[price < 6000 & asset_rarity < 60] -->
-<!-- scale_x <- seq(10, 60, 5) -->
-<!-- scale_y <- c(seq(0, 250, 25), seq(250, 500, 50), seq(500, 2000, 250), seq(2000, 6000, 500)) -->
-<!-- gg <- ggplot(X, aes(asset_rarity, price, shape = sc, customdata = link, -->
-<!--                     text = paste0(asset, -->
-<!--                                   "</br></br>", paste("Price:", price, -->
-<!--                                                       "</br>Last offer:", last_offer, -->
-<!--                                                       "</br>Rank:", asset_rank, -->
-<!--                                                       "</br>Rarity:", asset_rarity, -->
-<!--                                                       "</br>Market:", market, -->
-<!--                                                       "</br>Sc:", sc)))) + -->
-<!--   geom_point(color = "steelblue4", alpha = .6) + -->
-<!--   scale_x_continuous(breaks = scale_x, expand = c(0.03, 0)) + -->
-<!--   scale_y_continuous(breaks = scale_y, trans = "log2") + -->
-<!--   labs(x = "Rarity", y = "Listing price (log)", color = "Market", shape = "Smart contract") + -->
-<!--   theme(legend.title = element_text(size = 10)) -->
-
-<!-- ggplotly(gg, tooltip = "text") %>%  -->
-<!--   layout(legend = list(x = .025, y = .97, bgcolor = 'rgba(255,255,255,0.6)'), -->
-<!--          xaxis = list(tickangle = 45)) %>% -->
-<!--   onRender(js) -->
-<!-- ``` -->
-
-<!-- > Only listings with price<6000 and rarity<60 are displayed. Try clicking on the legend or datapoints. -->
-
-<!-- ## Column 2 {data-width=500, .tabset} -->
-<!-- ### Floor listings by rarity range -->
-<!-- ```{r} -->
-<!-- X <- DT[, .SD[price == min(price)], rarity_range][order(-rarity_range)] -->
-<!-- X[, img := sprintf('<img src="%s%d.png" class="img_html">', img_link, asset_number)] -->
-<!-- X[, img := sprintf('<a href="%s" target="_blank">%s</br>#%s</a>', link, img, asset_number)] -->
-
-<!-- X <- X[, .(rarity_range, img, price, asset_rank, asset_rarity, sc, market, asset_traits_num, asset_traits)] -->
-<!-- X <- X[complete.cases(X)] -->
-
-<!-- datatable(X, class = 'compact stripe hover', -->
-<!--           options = list(pageLength = 100, -->
-<!--                          scrollY = '100%', -->
-<!--                          bLengthChange = FALSE, -->
-<!--                          bPaginate = FALSE, -->
-<!--                          info = FALSE, -->
-<!--                          columnDefs = list(list(className = 'dt-right', targets = "_all"))), -->
-<!--           colnames = c("Rarity</br>range", "Asset", "Price", "Rank" , "Rarity", "Sc", "Market", -->
-<!--                        "Num.</br>traits", "Traits"), -->
-<!--           rownames = FALSE, -->
-<!--           escape = FALSE) %>% -->
-<!--   formatStyle(columns = 1:ncol(X), fontSize = '90%') -->
-<!-- ``` -->
-
-<!-- > Tip: Click on the image to open the listing. -->
-
-<!-- ### Listings stats by rarity range -->
-<!-- ```{r} -->
-<!-- X <- DT[, .(num_assets = .N, -->
-<!--             min_price = min(price), -->
-<!--             quant_05_price = quantile(price, probs = .05, names = FALSE), -->
-<!--             quant_10_price = quantile(price, probs = .10, names = FALSE), -->
-<!--             quant_25_price = quantile(price, probs = .25, names = FALSE), -->
-<!--             quant_50_price = quantile(price, probs = .50, names = FALSE), -->
-<!--             quant_75_price = quantile(price, probs = .75, names = FALSE), -->
-<!--             quant_90_price = quantile(price, probs = .90, names = FALSE), -->
-<!--             quant_95_price = quantile(price, probs = .95, names = FALSE), -->
-<!--             max_price = max(price)), rarity_range][order(-rarity_range)] -->
-
-<!-- .cols <- names(X)[!(names(X) %like% "_range")] -->
-<!-- X[, (.cols) := lapply(.SD, function(x) sprintf("%.f", x)), .SDcols = .cols] -->
-<!-- X <- X[complete.cases(X)] -->
-
-<!-- datatable(X, class = 'compact stripe hover', -->
-<!--           options = list(pageLength = 100, -->
-<!--                          scrollY = '100%', -->
-<!--                          bLengthChange = FALSE, -->
-<!--                          bPaginate = FALSE, -->
-<!--                          info = FALSE, -->
-<!--                          columnDefs = list(list(className = 'dt-right', targets = "_all"))), -->
-<!--           colnames = c("Rarity</br>range", "Num.</br>offers", "Min.</br>price", -->
-<!--                        "Price</br>Q5%", "Price</br>Q10%", "Price</br>Q25%", "Price</br>Q50%", -->
-<!--                        "Price</br>Q75%", "Price</br>Q90%", "Price</br>Q95%", "Max.</br>price"), -->
-<!--           rownames = FALSE, -->
-<!--           escape = FALSE) %>% -->
-<!--   formatStyle(columns = 1:ncol(X), fontSize = '90%') -->
-<!-- ``` -->
-
-<!-- > `Q` = Quantiles. For instance, `Q05%` means that only 5% of the listings prices are equal or below that price. -->
 
 # Traits {data-icon="ion-android-color-palette"}
 ## Column 1 {data-width=400, .tabset}
