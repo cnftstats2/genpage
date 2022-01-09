@@ -5,9 +5,17 @@ library(jsonlite)
 library(tidyr)
 library(httr)
 
+# Variables ----------------------------------------------------------------------------------------
+policy_id <- "c364930bd612f42e14d156e1c5410511e77f64cab8f2367a9df544d1"
+project <- "Boss Cat Rocket Club"
+time_now <- as_datetime(now())
+
+
+# Databases ----------------------------------------------------------------------------------------
 RAR <- readRDS("data/RAR_bcrc.rds")
 
-# Functions
+
+# Functions ----------------------------------------------------------------------------------------
 loj <- function (X = NULL, Y = NULL, onCol = NULL) {
   if (truelength(X) == 0 | truelength(Y) == 0) 
     stop("setDT(X) and setDT(Y) first")
@@ -15,11 +23,9 @@ loj <- function (X = NULL, Y = NULL, onCol = NULL) {
   X[Y, `:=`((n), mget(paste0("i.", n))), on = onCol]
 }
 
-time_now <- as_datetime(now())
 
 # CNFT listings ------------------------------------------------------------------------------------
 api_link_cnft <- "https://api.cnft.io/market/listings"
-project <- "Boss Cat Rocket Club"
 
 query <- function(page, url, project, sold) {
   httr::content(httr::POST(
@@ -80,8 +86,8 @@ CNFTS[, asset_number  := as.numeric(gsub("Boss Cat Rocket Club #", "", asset))]
 CNFTS[, price         := price/10**6]
 CNFTS[, market        := "cnft.io"]
 CNFTS[, sold_at       := as_datetime(soldAt)]
-CNFTS[, sold_at_hours := difftime(as_datetime(now()), sold_at, units = "hours")]
-CNFTS[, sold_at_days  := difftime(as_datetime(now()), sold_at, units = "days")]
+CNFTS[, sold_at_hours := difftime(time_now, sold_at, units = "hours")]
+CNFTS[, sold_at_days  := difftime(time_now, sold_at, units = "days")]
 
 CNFTS <- CNFTS[order(-sold_at), .(asset, asset_number, price, sold_at, sold_at_hours, 
                                   sold_at_days, market)]
@@ -92,7 +98,7 @@ CNFTS <- CNFTS[sold_at_hours <= 24*3]
 # jpg.store/api/policy - all supported policies
 # jpg.store/api/policy/[id]/listings - listings for a given policy
 # jpg.store/api/policy/[id]/sales - sales for a given policy
-api_link <- "jpg.store/api/policy/c364930bd612f42e14d156e1c5410511e77f64cab8f2367a9df544d1/listings"
+api_link <- sprintf("jpg.store/api/policy/%s/listings", policy_id)
 
 JPG <- data.table(fromJSON(rawToChar(GET(api_link)$content)))
 JPG[, link         := paste0("https://www.jpg.store/asset/", asset)]
@@ -107,7 +113,7 @@ JPG <- JPG[, .(asset, asset_number, type = "listing", price, last_offer = NA, sc
 
 
 # JPG sales ----------------------------------------------------------------------------------------
-api_link <- "jpg.store/api/policy/c364930bd612f42e14d156e1c5410511e77f64cab8f2367a9df544d1/sales"
+api_link <- sprintf("jpg.store/api/policy/%s/sales", policy_id)
 
 JPGS <- data.table(fromJSON(rawToChar(GET(api_link)$content)))
 JPGS[, price         := price_lovelace]
@@ -116,8 +122,8 @@ JPGS[, asset_number  := as.numeric(gsub("Boss Cat Rocket Club #", "", asset))]
 JPGS[, price         := price/10**6]
 JPGS[, market        := "jpg.store"]
 JPGS[, sold_at       := as_datetime(purchased_at)]
-JPGS[, sold_at_hours := difftime(as_datetime(now()), sold_at, units = "hours")]
-JPGS[, sold_at_days  := difftime(as_datetime(now()), sold_at, units = "days")]
+JPGS[, sold_at_hours := difftime(time_now, sold_at, units = "hours")]
+JPGS[, sold_at_days  := difftime(time_now, sold_at, units = "days")]
 
 JPGS <- JPGS[order(-sold_at), .(asset, asset_number, price, sold_at, sold_at_hours,
                                 sold_at_days, market)]
@@ -131,6 +137,9 @@ DT <- rbindlist(list(CNFT, JPG), fill = TRUE, use.names = TRUE)
 # Sales
 DTS <- rbindlist(list(CNFTS, JPGS), fill = TRUE, use.names = TRUE)
 
+# Add data collection timestamp
+DT[, data_date := time_now]
+DTS[, data_date := time_now]
 
 
 # Rarity and ranking -------------------------------------------------------------------------------
@@ -229,8 +238,11 @@ saveRDS(DTS, file = "data/DTS.rds")
 
 
 # Database evolution -------------------------------------------------------------------------------
-# if (file.exists("data/DT_evo_bcr.rds")) {
-#   DT_evo_bcrc <- readRDS("data/DT_evo_bcr.rds")
-# } else {
-#   saveRDS(DT, file = "data/DT_evo_bcr.rds")
-# }
+DTE <- copy(DT)
+if (file.exists("data/DTE_bcrc.rds")) {
+  cat("File data/DTE exists:", file.exists("data/DTE_bcrc.rds"), "\n")
+  DTE_old <- readRDS("data/DTE_bcrc.rds")
+  DTE <- rbindlist(list(DTE, DTE_old))
+  DTE <- DTE[difftime(time_now, data_date, units = "hours") <= 24] # Only retain last 24 hours
+}
+saveRDS(DTE, file = "data/DTE_bcrc.rds")
