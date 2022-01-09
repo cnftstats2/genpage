@@ -59,7 +59,6 @@ loj <- function (X = NULL, Y = NULL, onCol = NULL) {
 ```
 
 # Sidebar {data-width=80, .sidebar}
-<a href="#" data-toggle="tooltip" title="Hooray!">Hover over me</a>
 <ul id="sidebar_ul">
 <li id="currentProject"><a href="https://cnftstats.github.io/bcrc.html">BCRC</a></li>
 <li><a href="https://cnftstats.github.io/chilledkongs.html">ChilledKongs</a></li>
