@@ -134,7 +134,7 @@ if(!.enoughData) cat("Not enough data at the moment, please come back later.")
 X <- DTE[data_date %in% c(.data_date_now, .data_date_next)]
 X[, data_when := fcase(
   data_date == .data_date_now, "Now",
-  data_date == .data_date_next, sprintf("About %sh ago (%.0f mins)", .hours_ago, .diff_minutes_now_next)
+  data_date == .data_date_next, sprintf("About %sh ago", .hours_ago)
 )]
 
 data_when_order <- X[order(-data_date), unique(data_when)]
