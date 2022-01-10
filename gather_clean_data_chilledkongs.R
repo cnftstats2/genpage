@@ -137,6 +137,10 @@ DT <- rbindlist(list(CNFT, JPG), fill = TRUE, use.names = TRUE)
 # Sales
 DTS <- rbindlist(list(CNFTS, JPGS), fill = TRUE, use.names = TRUE)
 
+# Add data collection timestamp
+DT[, data_date := time_now]
+DTS[, data_date := time_now]
+
 
 # Rarity and ranking -------------------------------------------------------------------------------
 setDT(DT); setDT(RAR)
@@ -233,8 +237,11 @@ saveRDS(DTS, file = "data/DTS.rds")
 
 
 # Database evolution -------------------------------------------------------------------------------
-# if (file.exists("data/DT_evo_bcr.rds")) {
-#   DT_evo_bcrc <- readRDS("data/DT_evo_bcr.rds")
-# } else {
-#   saveRDS(DT, file = "data/DT_evo_bcr.rds")
-# }
+DTE <- copy(DT)
+if (file.exists("data/DTE_chilledkongs.rds")) {
+  cat("File data/DTE exists:", file.exists("data/DTE_chilledkongs.rds"), "\n")
+  DTE_old <- readRDS("data/DTE_chilledkongs.rds")
+  DTE <- rbindlist(list(DTE, DTE_old))
+  DTE <- DTE[difftime(time_now, data_date, units = "hours") <= 24] # Only retain last 24 hours
+}
+saveRDS(DTE, file = "data/DTE_chilledkongs.rds")
