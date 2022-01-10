@@ -63,7 +63,8 @@ timestamp <- as.numeric(Sys.time())
 cat("
 <script>
 $(document).ready(function(){
-  $('.navbar-author').after('</br><span id=", '"updatedat"', ">Updated: <span data-livestamp=", '"', timestamp, '"', "></span></span>');
+  $('.navbar-author')
+    .after('</br><span id=\"updatedat\">Updated: <span data-livestamp=\"", timestamp, "\"></span></span>');
 });
 </script>
 ", sep = "")
