@@ -287,7 +287,7 @@ datatable(X, class = 'compact stripe hover nowrap',
 ## Column 1 {data-width=500, .tabset}
 ### Listings x rank
 ```{r}
-max_y <- 15000
+max_y <- 25000
 X <- DT[price <= max_y]
 scale_x <- c(seq(0, 2000, 250), seq(2500, 10000, 500))
 scale_x[scale_x == 0] <- 1
@@ -314,37 +314,9 @@ ggplotly(gg, tooltip = "text") %>%
 
 > Only listings below 15000 ada are displayed. Try clicking on the legend or datapoints.
 
-<!-- ### Log scale -->
-<!-- ```{r} -->
-<!-- X <- DT[price <= 15000] -->
-<!-- scale_x <- c(seq(0, 2000, 250), seq(2500, 10000, 500)) -->
-<!-- scale_x[scale_x == 0] <- 1 -->
-<!-- scale_x[scale_x == 10000] <- 9999 -->
-<!-- gg <- ggplot(X, aes(asset_rank, price, shape = sc, customdata = link, -->
-<!--                     text = paste0(asset, -->
-<!--                                   "</br></br>", paste("Price:", price, -->
-<!--                                                       "</br>Last offer:", last_offer, -->
-<!--                                                       "</br>Rank:", asset_rank, -->
-<!--                                                       "</br>Rarity:", asset_rarity, -->
-<!--                                                       "</br>Market:", market, -->
-<!--                                                       "</br>Sc:", sc)))) + -->
-<!--   geom_point(color = "steelblue4", alpha = .6) + -->
-<!--   scale_x_reverse(breaks = scale_x, expand = c(0.03, 0)) + -->
-<!--   scale_y_continuous(n.breaks = 15, trans = "log2") + -->
-<!--   labs(x = "Rank", y = "Listing price (log)", color = "Market", shape = "Smart contract") + -->
-<!--   theme(legend.title = element_text(size = 10)) -->
-
-<!-- ggplotly(gg, tooltip = "text") %>%  -->
-<!--   layout(legend = list(x = .025, y = .97, bgcolor = 'rgba(255,255,255,0.6)'), -->
-<!--          xaxis = list(tickangle = 45)) %>% -->
-<!--   onRender(js) -->
-<!-- ``` -->
-
-<!-- > Only listings below 15000 ada are displayed. Try clicking on the legend or datapoints. -->
-
 ### Sales x rank
 ```{r}
-max_y <- 15000
+max_y <- 25000
 X <- DTS[price <= max_y]
 X[, sold_time := trunc(sold_at_days)]
 X[, sold_time := fcase(trunc(sold_at_days) == 0, "0-24h ago",
