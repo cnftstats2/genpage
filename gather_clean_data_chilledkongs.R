@@ -60,6 +60,7 @@ query_n <- function(url, project, sold, n = "all") {
 CNFT <- query_n(api_link_cnft, project, sold = FALSE) |>
   lapply(data.table) |> rbindlist(fill = TRUE)
 
+CNFT <- CNFT[asset.policyId == policy_id]
 CNFT[, asset        := gsub("ChilledKong", "Chilled Kong #", asset.metadata.name)]
 CNFT[, link         := paste0("https://cnft.io/token/", X_id)]
 CNFT[, asset_number := as.numeric(gsub("Chilled Kong #", "", asset))]
@@ -215,24 +216,17 @@ DTS[, rank_range := fcase(asset_rank %between% c(1, 100), "1-100",
 
 
 # Large format -------------------------------------------------------------------------------------
-# .cols <- names(DT)[names(DT) %like% "background_|earring_|hat_|eyes_|mouth_|clothes_|fur_"]
-# DTL <- data.table(gather(DT, raw_trait, has_trait, all_of(.cols)))
-# DTL <- DTL[has_trait == 1]
-# 
-# DTL[, trait_category := strsplit(raw_trait, "_")[[1]][1], 1:nrow(DTL)]
-# DTL[, trait          := gsub(trait_category, "", raw_trait), 1:nrow(DTL)]
-# DTL[, trait          := gsub("_", " ", trait), 1:nrow(DTL)]
-# DTL[, trait          := gsub("^ ", "", trait), 1:nrow(DTL)]
-# 
-# DTL[, trait_category_and_trait := paste0(trait_category, "_", trait)]
+.cols <- names(DT)[names(DT) %like% "asset_trait_"]
+DTL <- data.table(gather(DT, key, value, all_of(.cols)))
 
-DT[, `:=`(asset_traits_num = "NA", asset_traits = "NA")] # REMOVE THISSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
-
+DTL[, trait_category := strsplit(value, "_")[[1]][1], 1:nrow(DTL)]
+DTL[, trait_category := gsub("\\.", " ", trait_category)]
+DTL[, trait          := strsplit(value, "_")[[1]][2], 1:nrow(DTL)]
 
 
 # Save ---------------------------------------------------------------------------------------------
 saveRDS(DT, file = "data/DT.rds")
-# saveRDS(DTL, file = "data/DTL.rds")
+saveRDS(DTL, file = "data/DTL.rds")
 saveRDS(DTS, file = "data/DTS.rds")
 
 
@@ -241,7 +235,7 @@ DTE <- copy(DT)
 if (file.exists("data/DTE_chilledkongs.rds")) {
   cat("File data/DTE exists:", file.exists("data/DTE_chilledkongs.rds"), "\n")
   DTE_old <- readRDS("data/DTE_chilledkongs.rds")
-  DTE <- rbindlist(list(DTE, DTE_old))
+  DTE <- rbindlist(list(DTE, DTE_old), fill = TRUE)
   DTE <- DTE[difftime(time_now, data_date, units = "hours") <= 24] # Only retain last 24 hours
 }
 saveRDS(DTE, file = "data/DTE_chilledkongs.rds")
