@@ -81,51 +81,7 @@ $(document).ready(function(){
 
 # Floor {data-icon="ion-arrow-graph-up-right"}
 ## Column 1 {data-width=650 .tabset}
-### Listings distribution
-```{r fig.width=8}
-X <- copy(DT)
-X[price %between% c(0,     2999),  price_range := trunc(price/100)*100]
-X[price %between% c(3000,  4999),  price_range := trunc(price/500)*500]
-X[price %between% c(5000,  9999),  price_range := trunc(price/1000)*1000]
-X[price %between% c(10000, 24999), price_range := trunc(price/5000)*5000]
-X[price >= 25000,                  price_range := 25000]
-X <- X[complete.cases(price_range), .(price_range, market)]
-num_listings <- nrow(X)
-
-X <- X[, .N, .(price_range, market)][order(price_range)]
-X[price_range %between% c(0,     2999),  x_label := paste0(price_range, "-", price_range + (100-1))]
-X[price_range %between% c(3000,  4999),  x_label := paste0(price_range, "-", price_range + (500-1))]
-X[price_range %between% c(5000,  9999),  x_label := paste0(price_range, "-", price_range + (1000-1))]
-X[price_range %between% c(10000, 24999), x_label := paste0(price_range, "-", price_range + (5000-1))]
-X[price_range >= 25000,                  x_label := "25000+"]
-
-.X <- X[, .(price_range, x_label)] %>% unique %>% .[order(price_range)]
-X[, x_label := factor(x_label, levels = .X$x_label)]
-X[, market := factor(market, levels = c("jpg.store", "cnft.io"))]
-
-ggplot(X, aes(x_label, N, fill = market)) +
-  geom_bar(stat = "identity", alpha = .9) +
-  geom_text(aes(label = stat(y), group = x_label),
-            stat = 'summary', fun = sum, vjust = -.5, hjust = +.55,
-            color = "steelblue4", size = 3) +
-  scale_fill_manual(values = c("jpg.store" = "steelblue3", "cnft.io" = "steelblue4")) +
-  labs(x = "Price range", y = "Number of listings", fill = "",
-       caption = sprintf("Floor: %d ada  |  Listings: %d\nSource: https://cnftstats.github.io/",
-                         min(DT$price), num_listings)) +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = -45, vjust = +.5, hjust = 0,
-                                   color = "grey50", size = 8),
-        axis.text.y = element_text(color = "grey50", size = 8),
-        axis.title = element_text(color = "grey30", size = 9),
-        legend.position = "bottom", legend.justification = 'right', legend.direction = "horizontal",
-        legend.text = element_text(color = "grey50", size = 9),
-        legend.key.height = unit(0.5, "points"), legend.key.width = unit(10, "points"),
-        legend.box.spacing = unit(-10, "points"),
-        plot.caption = element_text(color = "#008B8B", vjust = +17, hjust = 0, size = 8),
-        plot.margin = unit(c(0, 15, 0, 0), units = "pt"))
-```
-
-### Listing distribution over time
+### Listings
 ```{r}
 # Is there enough data?
 .hours_ago <- 12
@@ -166,7 +122,6 @@ CAP <- X[, .(floor = min(price), listings = .N), data_when]
   "\nSource: https://cnftstats.github.io/"
 )
 
-
 X <- X[, .N, .(price_range, market, data_when)][order(price_range)]
 X[price_range %between% c(0,     2999),  x_label := paste0(price_range, "-", price_range + (100-1))]
 X[price_range %between% c(3000,  4999),  x_label := paste0(price_range, "-", price_range + (500-1))]
@@ -200,7 +155,7 @@ ggplot(X, aes(x_label, N, fill = market, alpha = data_when)) +
         plot.margin = unit(c(0, 15, 0, 0), units = "pt"))
 ```
 
-### Sales distribution over time
+### Sales
 ```{r fig.height=7, fig.width=10}
 X <- copy(DTS)
 X[, sold_time := trunc(sold_at_days)]
