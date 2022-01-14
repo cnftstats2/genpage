@@ -267,7 +267,7 @@ ggplotly(gg, tooltip = "text") %>%
   onRender(js)
 ```
 
-> Only listings below 15000 ada are displayed. Try clicking on the legend or datapoints.
+> Only listings below `r max_y` ada are displayed. Try clicking on the legend or datapoints.
 
 ### Sales x rank
 ```{r}
@@ -296,7 +296,7 @@ ggplotly(gg, tooltip = "text") %>%
          xaxis = list(tickangle = 45))
 ```
 
-> Only listings below 15000 ada are displayed.
+> Only listings below `r max_y` ada are displayed.
 
 ### Listings distribution by rank range
 ```{r fig.height=7, fig.width=8}
@@ -400,7 +400,7 @@ datatable(X, class = 'compact stripe hover',
 > Tip: Click on the image to open the listing.
 
 # Traits {data-icon="ion-android-color-palette"}
-## Column 1 {data-width=400, .tabset}
+## Column 1 {data-width=400}
 ### Floor listings by trait
 ```{r}
 X <- DTL[, .SD[price == min(price)], trait_category_and_trait][order(trait_category_and_trait)]
@@ -410,7 +410,7 @@ X[, img := sprintf('<a href="%s" target="_blank">%s</br>#%s</a>', link, img, ass
 X <- X[, .(trait_category, trait, img, price, asset_rank, asset_rarity,
            sc, market, asset_traits_num, asset_traits)]
 
-X <- X[order(trait_category, trait, asset_rank)]
+X <- X[order(-price)]
 X <- X[complete.cases(X)]
 
 datatable(X, class = 'compact stripe hover',
@@ -429,71 +429,6 @@ datatable(X, class = 'compact stripe hover',
   formatStyle(columns = 1:ncol(X), fontSize = '90%')
 ```
 
-### Floor traits ranking (comming)
-```{r}
-# # Only retain 1 listing per trait_category_and_trait (the one with the highest ranking if more than one)
-# X <- DTL[order(asset_rank)]
-# X <- DTL[, .SD[price == min(price)][1, ], trait_category_and_trait]
-# 
-# X <- X[sample(.N, 10)]
-# 
-# box_div <- "<div class='box blue'></div>"
-# 
-# X[, price_link := sprintf('<a id="floor_traits_raking" href="%s" target="_blank">%s ada</a>', link, price)]
-# rescale <- function(x, newMin, newMax) (x - min(x))/(max(x)-min(x)) * (newMax - newMin) + newMin
-# 
-# X[, box_width := rescale(price, newMin = 100, newMax = 700)]
-# X[, boxes := sprintf("<div class='box_priciest' style='width:%spx'></div>", box_width), 1:nrow(X)]
-# X[, boxes := paste0(boxes, price_link)]
-# X <- X[order(-price)]
-# X <- X[, .(trait_category, trait, boxes)]
-# 
-# datatable(X, class = 'floor_trait_raking_table compact stripe hover nowrap',
-#           options = list(dom = "t",
-#                          pageLength = 100,
-#                          scrollY = '100%',
-#                          bLengthChange = FALSE,
-#                          bPaginate = FALSE,
-#                          info = FALSE,
-#                          columnDefs = list(list(className = 'dt-left', targets = "_all"))),
-#           rownames = FALSE,
-#           escape = FALSE) %>%
-#   formatStyle(columns = 1:ncol(X), fontSize = '90%')
-
-
-# datatable(X, class = 'compact stripe hover nowrap',
-#           options = list(dom = "t",
-#                          pageLength = 100,
-#                          scrollY = '100%',
-#                          bLengthChange = FALSE,
-#                          bPaginate = FALSE,
-#                          info = FALSE,
-#                          columnDefs = list(list(className = 'dt-right', targets = "_all"))),
-#           colnames = c("Asset", "Price", "Rank", "Rarity", "Sc", "Market"),
-#           rownames = FALSE,
-#           escape = FALSE) %>%
-#   formatStyle(columns = 1:ncol(X), fontSize = '90%')
-
-
-# ggplot(X, aes(reorder(trait_category_and_trait, price), price, fill = trait_category, label = price)) +
-#   geom_bar(stat = "identity", alpha = .8) +
-#   geom_text(vjust = +.5, hjust = -.15, color = "steelblue4", size = 3) +
-#   scale_x_discrete(labels = function(x) sapply(x, function(.x) strsplit(.x, "_")[[1]][2])) +
-#   scale_fill_brewer(type = "qual", palette = 2) +
-#   labs(x = "", y = "Price", fill = "") +
-#   theme_minimal() +
-#   theme(axis.text.x = element_text(angle = -45, vjust = +.5, hjust = 0,
-#                                    color = "grey50", size = 8),
-#         axis.text.y = element_text(color = "grey50", size = 8),
-#         legend.position = "top", legend.justification = 'left', legend.direction = "horizontal",
-#         legend.text = element_text(color = "grey50", size = 8),
-#         plot.caption = element_text(color = "#008B8B", vjust = +13, hjust = 0, size = 8),
-#         plot.margin = unit(c(0, 15, 0, 0), units = "pt"),
-#         axis.title.x = element_text(color = "grey30", size = 12),
-#         axis.title.y = element_text(color = "grey30", size = 12)) +
-#   guides(fill = guide_legend(nrow = 1)) +
-#   coord_flip()
-```
 
 # Search {data-icon="ion-android-search"}
 ## Column 1
