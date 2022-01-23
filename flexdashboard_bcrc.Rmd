@@ -240,14 +240,13 @@ datatable(X, class = 'compact stripe hover nowrap',
 ```
 
 # Rank {data-icon="fa-signal"}
-## Column 1 {data-width=500, .tabset}
+## Column 1 {data-width=600, .tabset}
 ### Listings x rank
 ```{r}
-max_y <- 25000
+max_y <- max(DT[, quantile(price, probs = .90)], DTS[, max(price)])
+min_y <- min(DT[, min(price)], DTS[, min(price)])
 X <- DT[price <= max_y]
-scale_x <- c(seq(0, 2000, 250), seq(2500, 10000, 500))
-scale_x[scale_x == 0] <- 1
-scale_x[scale_x == 10000] <- 9999
+scale_x <- c(1, seq(1000, 9000, 1000), 9999)
 gg <- ggplot(X, aes(asset_rank, price, shape = sc, customdata = link,
                     text = paste0(asset,
                                   "</br></br>", paste("Price:", price,
@@ -258,7 +257,7 @@ gg <- ggplot(X, aes(asset_rank, price, shape = sc, customdata = link,
                                                       "</br>Sc:", sc)))) +
   geom_point(color = "steelblue4", alpha = .6) +
   scale_x_reverse(breaks = scale_x, expand = c(0.03, 0)) +
-  scale_y_continuous(n.breaks = 15, limits = c(0, max_y)) +
+  scale_y_continuous(n.breaks = 15, limits = c(min_y, max_y)) +
   labs(x = "Rank", y = "Listing price", color = "Market", shape = "Smart contract") +
   theme(legend.title = element_text(size = 10))
 
@@ -268,28 +267,32 @@ ggplotly(gg, tooltip = "text") %>%
   onRender(js)
 ```
 
-> Only listings below `r max_y` ada are displayed. Try clicking on the legend or datapoints.
+> Only listings below `r as.character(max_y)` ada are displayed. Try clicking on the legend or datapoints.
 
 ### Sales x rank
 ```{r}
-max_y <- 25000
+max_y <- max(DT[, quantile(price, probs = .90)], DTS[, max(price)])
+min_y <- min(DT[, min(price)], DTS[, min(price)])
 X <- DTS[price <= max_y]
 X[, sold_time := trunc(sold_at_days)]
 X[, sold_time := fcase(trunc(sold_at_days) == 0, "0-24h ago",
                        trunc(sold_at_days) == 1, "24-48h ago",
                        trunc(sold_at_days) == 2, "48-72h ago")]
-scale_x <- c(seq(0, 2000, 250), seq(2500, 10000, 500))
-scale_x[scale_x == 0] <- 1
-scale_x[scale_x == 10000] <- 9999
-
-gg <- ggplot(X, aes(asset_rank, price, color = sold_time, alpha = sold_time)) +
+scale_x <- c(1, seq(1000, 9000, 1000), 9999)
+gg <- ggplot(X, aes(asset_rank, price, color = sold_time, alpha = sold_time,
+                    text = paste0(asset,
+                                  "</br></br>", paste("Price:", price,
+                                                      "</br>Sold time:", sold_time,
+                                                      "</br>Rank:", asset_rank,
+                                                      "</br>Rarity:", asset_rarity,
+                                                      "</br>Market:", market)))) +
   geom_point(color = "springgreen4") +
   scale_x_reverse(breaks = scale_x, expand = c(0.03, 0)) +
-  scale_y_continuous(n.breaks = 15, limits = c(0, max_y)) +
+  scale_y_continuous(n.breaks = 15, limits = c(min_y, max_y)) +
   scale_alpha_manual(values = c("0-24h ago" = 1,
                                 "24-48h ago" = 0.6,
                                 "48-72h ago" = 0.2)) +
-  labs(x = "Rank", y = "Sold price", color = "When") +
+  labs(x = "Rank", y = "Sold price", color = "Sold time", alpha = "Sold time") +
   theme(legend.title = element_text(size = 10))
 
 ggplotly(gg, tooltip = "text") %>% 
@@ -297,7 +300,7 @@ ggplotly(gg, tooltip = "text") %>%
          xaxis = list(tickangle = 45))
 ```
 
-> Only listings below `r max_y` ada are displayed.
+> Only listings below `r as.character(max_y)` ada are displayed.
 
 ### Listings distribution by rank range
 ```{r fig.height=7, fig.width=8}
@@ -374,25 +377,25 @@ ggplot(X, aes(rank_range, N, fill = market)) +
 ```
 
 
-## Column 2 {data-width=500, .tabset}
+## Column 2 {data-width=400}
 ### Floor listings by rank range
 ```{r}
 X <- DT[, .SD[price == min(price)], rank_range][order(rank_range)]
 X[, img := sprintf('<img src="%s%d.png" class="img_html">', img_link, asset_number)]
 X[, img := sprintf('<a href="%s" target="_blank">%s</br>#%s</a>', link, img, asset_number)]
 
-X <- X[, .(rank_range, img, price, asset_rank, asset_rarity, sc, market, asset_traits_num, asset_traits)]
+X <- X[, .(rank_range, img, price, asset_rank, asset_rarity, sc, market)]
 X <- X[complete.cases(X)]
 
 datatable(X, class = 'compact stripe hover',
-          options = list(pageLength = 100,
+          options = list(dom = "t",
+                         pageLength = 100,
                          scrollY = '100%',
                          bLengthChange = FALSE,
                          bPaginate = FALSE,
                          info = FALSE,
                          columnDefs = list(list(className = 'dt-right', targets = "_all"))),
-          colnames = c("Rank</br>range", "Asset", "Price", "Rank", "Rarity", "Sc", "Market",
-                       "Num.</br>traits", "Traits"),
+          colnames = c("Rank range", "Asset", "Price", "Rank", "Rarity", "Sc", "Market"),
           rownames = FALSE,
           escape = FALSE) %>%
   formatStyle(columns = 1:ncol(X), fontSize = '90%')
