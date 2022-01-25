@@ -21,20 +21,25 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, comment = "", dev = "svglit
 library(flexdashboard)
 library(htmlwidgets)
 library(data.table)
+library(lubridate)
 library(magrittr)
 library(ggplot2)
 library(svglite)
 library(plotly)
 library(DT)
 
+# Paramaters
+project_label <- "sac"
+
 # Data
 DT <- readRDS("data/DT.rds")
 DTL <- readRDS("data/DTL.rds")
-RAR <- readRDS("data/RAR_sac.rds")
+RAR <- readRDS(sprintf("data/RAR_%s.rds", project_label))
 DTS <- readRDS("data/DTS.rds")
-DTE <- readRDS("data/DTE_sac.rds")
+DTE <- readRDS(sprintf("data/DTE_%s.rds", project_label))
 
-img_link <- "https://raw.githubusercontent.com/cnftstats/images/main/sac/sac"
+img_link <- sprintf("https://raw.githubusercontent.com/cnftstats/images/main/%s/%s",
+                    project_label, project_label)
 
 # javascript (clickable datapoints url)
 # https://stackoverflow.com/questions/51681079/how-to-make-scatterplot-points-open-a-hyperlink-using-ggplotly-r
@@ -45,6 +50,7 @@ js <- "function(el, x) {
     window.open(link);
   });
 }"
+
 
 # Functions
 loj <- function (X = NULL, Y = NULL, onCol = NULL) {
@@ -61,7 +67,8 @@ timestamp <- as.numeric(Sys.time())
 cat("
 <script>
 $(document).ready(function(){
-  $('.navbar-author').after('</br><span id=", '"updatedat"', ">Updated: <span data-livestamp=", '"', timestamp, '"', "></span></span>');
+  $('.navbar-author')
+    .after('</br><span id=\"updatedat\">Updated: <span data-livestamp=\"", timestamp, "\"></span></span>');
 });
 </script>
 ", sep = "")
@@ -69,61 +76,17 @@ $(document).ready(function(){
 
 # Sidebar {data-width=80, .sidebar}
 <ul id="sidebar_ul">
-  <li><a href="https://cnftstats.github.io/bcrc.html">BCRC</a></li>
+  <li id="currentProject"><a href="https://cnftstats.github.io/bcrc.html">BCRC</a></li>
   <li><a href="https://cnftstats.github.io/borgs.html">BorgsClub</a></li>
   <li><a href="https://cnftstats.github.io/chilledkongs.html">ChilledKongs</a></li>
   <li><a href="https://cnftstats.github.io/mocossi.html">Mocossi</a></li>
   <li><a href="https://cnftstats.github.io/pavia.html">Pavia</a></li>
-  <li id="currentProject"><a href="https://cnftstats.github.io/sac.html">SpaceApe</a></li>
+  <li><a href="https://cnftstats.github.io/sac.html">SpaceApe</a></li>
 </ul>
 
 # Floor {data-icon="ion-arrow-graph-up-right"}
-## Column 1 {data-width=650, .tabset}
-### Price distribution
-```{r fig.width=8}
-X <- copy(DT)
-X[price %between% c(0, 999),     price_range := trunc(price/50)*50]
-X[price %between% c(1000, 1999), price_range := trunc(price/200)*200]
-X[price %between% c(2000, 4999), price_range := trunc(price/500)*500]
-X[price %between% c(5000, 9999), price_range := trunc(price/2000)*2000]
-X[price >= 10000, price_range := 10000]
-X <- X[complete.cases(price_range), .(price_range, market)]
-num_listings <- nrow(X)
-
-X <- X[, .N, .(price_range, market)][order(price_range)]
-X[price_range %between% c(0, 999),     x_label := paste0(price_range, "-", price_range + (50-1))]
-X[price_range %between% c(1000, 1999), x_label := paste0(price_range, "-", price_range + (200-1))]
-X[price_range %between% c(2000, 4999), x_label := paste0(price_range, "-", price_range + (500-1))]
-X[price_range %between% c(5000, 9999), x_label := paste0(price_range, "-", price_range + (2000-1))]
-X[price_range > 9999,                  x_label := "10000+"]
-
-.X <- X[, .(price_range, x_label)] %>% unique %>% .[order(price_range)]
-X[, x_label := factor(x_label, levels = .X$x_label)]
-X[, market := factor(market, levels = c("jpg.store", "cnft.io"))]
-
-ggplot(X, aes(x_label, N, fill = market)) +
-  geom_bar(stat = "identity", alpha = .9) +
-  geom_text(aes(label = stat(y), group = x_label),
-            stat = 'summary', fun = sum, vjust = -.5, hjust = +.55,
-            color = "steelblue4", size = 3) +
-  scale_fill_manual(values = c("jpg.store" = "steelblue3", "cnft.io" = "steelblue4")) +
-  labs(x = "Price range", y = "Number of listings", fill = "",
-       caption = sprintf("Floor: %d ada  |  Listings: %d\nSource: https://cnftstats.github.io/",
-                         min(DT$price), num_listings)) +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = -45, vjust = +.5, hjust = 0,
-                                   color = "grey50", size = 8),
-        axis.text.y = element_text(color = "grey50", size = 8),
-        axis.title = element_text(color = "grey30", size = 9),
-        legend.position = "bottom", legend.justification = 'right', legend.direction = "horizontal",
-        legend.text = element_text(color = "grey50", size = 9),
-        legend.key.height = unit(0.5, "points"), legend.key.width = unit(10, "points"),
-        legend.box.spacing = unit(-10, "points"),
-        plot.caption = element_text(color = "#008B8B", vjust = +17, hjust = 0, size = 8),
-        plot.margin = unit(c(0, 15, 0, 0), units = "pt"))
-```
-
-### Listings distribution
+## Column 1 {data-width=650 .tabset}
+### Listings
 ```{r}
 # Is there enough data?
 .hours_ago <- 12
@@ -131,16 +94,12 @@ ggplot(X, aes(x_label, N, fill = market)) +
 .data_date_now <- .data_dates[length(.data_dates)]
 .data_date_after <- .data_dates[!(.data_dates %in% .data_date_now)]
 .data_date_after_hours <- difftime(.data_date_now, .data_date_after, units = "hours")
-.enoughData <- ifelse(all(.data_date_after_hours < .hours_ago), FALSE, TRUE)
-
-if(!.enoughData) cat("Not enough data at the moment, please come back later.")
 
 # Find data date collection closest to one hour after the first data collection
 .data_date_next <- .data_date_after[which.min(abs(.data_date_after_hours - .hours_ago))]
 .diff_minutes_now_next <- difftime(.data_date_now, .data_date_next, units = "mins")
-```
 
-```{r eval=.enoughData, fig.height=7, fig.width=10}
+# Plot
 X <- DTE[data_date %in% c(.data_date_now, .data_date_next)]
 X[, data_when := fcase(
   data_date == .data_date_now, "Now",
@@ -197,7 +156,7 @@ ggplot(X, aes(x_label, N, fill = market, alpha = data_when)) +
         plot.margin = unit(c(0, 15, 0, 0), units = "pt"))
 ```
 
-### Sales distribution
+### Sales
 ```{r fig.height=7, fig.width=10}
 X <- copy(DTS)
 X[, sold_time := trunc(sold_at_days)]
@@ -281,14 +240,13 @@ datatable(X, class = 'compact stripe hover nowrap',
 ```
 
 # Rank {data-icon="fa-signal"}
-## Column 1 {data-width=500, .tabset}
-### Linear scale
+## Column 1 {data-width=600, .tabset}
+### Listings x rank
 ```{r}
-max_y <- 6000
+max_y <- max(DT[, quantile(price, probs = .90)], DTS[, max(price)])
+min_y <- min(DT[, min(price)], DTS[, min(price)])
 X <- DT[price <= max_y]
-scale_x <- c(seq(0, 2000, 250), seq(2500, 10000, 500))
-scale_x[scale_x == 0] <- 1
-scale_x[scale_x == 10000] <- 9999
+scale_x <- c(1, seq(1000, 9000, 1000), 9999)
 gg <- ggplot(X, aes(asset_rank, price, shape = sc, customdata = link,
                     text = paste0(asset,
                                   "</br></br>", paste("Price:", price,
@@ -299,7 +257,7 @@ gg <- ggplot(X, aes(asset_rank, price, shape = sc, customdata = link,
                                                       "</br>Sc:", sc)))) +
   geom_point(color = "steelblue4", alpha = .6) +
   scale_x_reverse(breaks = scale_x, expand = c(0.03, 0)) +
-  scale_y_continuous(n.breaks = 15, limits = c(0, max_y)) +
+  scale_y_continuous(n.breaks = 15, limits = c(min_y, max_y)) +
   labs(x = "Rank", y = "Listing price", color = "Market", shape = "Smart contract") +
   theme(legend.title = element_text(size = 10))
 
@@ -309,28 +267,32 @@ ggplotly(gg, tooltip = "text") %>%
   onRender(js)
 ```
 
-> Only listings below `r max_y` ada are displayed. Try clicking on the legend or datapoints.
+> Only listings below `r as.character(max_y)` ada are displayed. Try clicking on the legend or datapoints.
 
 ### Sales x rank
 ```{r}
-max_y <- 6000
+max_y <- max(DT[, quantile(price, probs = .90)], DTS[, max(price)])
+min_y <- min(DT[, min(price)], DTS[, min(price)])
 X <- DTS[price <= max_y]
 X[, sold_time := trunc(sold_at_days)]
 X[, sold_time := fcase(trunc(sold_at_days) == 0, "0-24h ago",
                        trunc(sold_at_days) == 1, "24-48h ago",
                        trunc(sold_at_days) == 2, "48-72h ago")]
-scale_x <- c(seq(0, 2000, 250), seq(2500, 10000, 500))
-scale_x[scale_x == 0] <- 1
-scale_x[scale_x == 10000] <- 9999
-
-gg <- ggplot(X, aes(asset_rank, price, color = sold_time, alpha = sold_time)) +
+scale_x <- c(1, seq(1000, 9000, 1000), 9999)
+gg <- ggplot(X, aes(asset_rank, price, color = sold_time, alpha = sold_time,
+                    text = paste0(asset,
+                                  "</br></br>", paste("Price:", price,
+                                                      "</br>Sold time:", sold_time,
+                                                      "</br>Rank:", asset_rank,
+                                                      "</br>Rarity:", asset_rarity,
+                                                      "</br>Market:", market)))) +
   geom_point(color = "springgreen4") +
   scale_x_reverse(breaks = scale_x, expand = c(0.03, 0)) +
-  scale_y_continuous(n.breaks = 15, limits = c(0, max_y)) +
+  scale_y_continuous(n.breaks = 15, limits = c(min_y, max_y)) +
   scale_alpha_manual(values = c("0-24h ago" = 1,
                                 "24-48h ago" = 0.6,
                                 "48-72h ago" = 0.2)) +
-  labs(x = "Rank", y = "Sold price", color = "When") +
+  labs(x = "Rank", y = "Sold price", color = "Sold time", alpha = "Sold time") +
   theme(legend.title = element_text(size = 10))
 
 ggplotly(gg, tooltip = "text") %>% 
@@ -338,7 +300,7 @@ ggplotly(gg, tooltip = "text") %>%
          xaxis = list(tickangle = 45))
 ```
 
-> Only listings below `r max_y` ada are displayed.
+> Only listings below `r as.character(max_y)` ada are displayed.
 
 ### Listings distribution by rank range
 ```{r fig.height=7, fig.width=8}
@@ -414,25 +376,26 @@ ggplot(X, aes(rank_range, N, fill = market)) +
         panel.spacing.y = unit(1, "lines"))
 ```
 
-## Column 2 {data-width=500}
+
+## Column 2 {data-width=400}
 ### Floor listings by rank range
 ```{r}
 X <- DT[, .SD[price == min(price)], rank_range][order(rank_range)]
 X[, img := sprintf('<img src="%s%d.png" class="img_html">', img_link, asset_number)]
 X[, img := sprintf('<a href="%s" target="_blank">%s</br>#%s</a>', link, img, asset_number)]
 
-X <- X[, .(rank_range, img, price, asset_rank, asset_rarity, sc, market, asset_traits_num, asset_traits)]
+X <- X[, .(rank_range, img, price, asset_rank, asset_rarity, sc, market)]
 X <- X[complete.cases(X)]
 
 datatable(X, class = 'compact stripe hover',
-          options = list(pageLength = 100,
+          options = list(dom = "t",
+                         pageLength = 100,
                          scrollY = '100%',
                          bLengthChange = FALSE,
                          bPaginate = FALSE,
                          info = FALSE,
                          columnDefs = list(list(className = 'dt-right', targets = "_all"))),
-          colnames = c("Rank</br>range", "Asset", "Price", "Rank", "Rarity", "Sc", "Market",
-                       "Num.</br>traits", "Traits"),
+          colnames = c("Rank range", "Asset", "Price", "Rank", "Rarity", "Sc", "Market"),
           rownames = FALSE,
           escape = FALSE) %>%
   formatStyle(columns = 1:ncol(X), fontSize = '90%')
@@ -448,8 +411,7 @@ X <- DTL[, .SD[price == min(price)], .(trait_category, trait)][order(trait_categ
 X[, img := sprintf('<img src="%s%d.png" class="img_html">', img_link, asset_number)]
 X[, img := sprintf('<a href="%s" target="_blank">%s</br>#%s</a>', link, img, asset_number)]
 
-X <- X[, .(trait_category, trait, img, price, asset_rank, asset_rarity,
-           sc, market, asset_traits_num, asset_traits)]
+X <- X[, .(trait_category, trait, img, price, sc, market, asset_traits_num, asset_traits)]
 
 X <- X[order(-price)]
 X <- X[complete.cases(X)]
@@ -462,7 +424,7 @@ datatable(X, class = 'compact stripe hover',
                          bPaginate = FALSE,
                          info = FALSE,
                          columnDefs = list(list(className = 'dt-right', targets = "_all"))),
-          colnames = c("Trait</br>category", "Trait", "Asset", "Price", "Rank",  "Rarity", "Sc", "Market",
+          colnames = c("Trait</br>category", "Trait", "Asset", "Price", "Sc", "Market",
                        "Num.</br>traits", "Traits"),
           filter = "top",
           rownames = FALSE,
@@ -475,7 +437,7 @@ datatable(X, class = 'compact stripe hover',
 ### Find your NFT rank and rarity
 ```{r}
 # ion-information-circled
-X <- RAR[, .(asset_name, asset_rank, asset_rarity, asset_traits_num, asset_traits)]
+X <- RAR[, .(asset_name, asset_traits_num, asset_traits)]
 datatable(X, class = 'compact stripe hover',
           options = list(pageLength = 30,
                          scrollY = '100%',
@@ -483,7 +445,7 @@ datatable(X, class = 'compact stripe hover',
                          bPaginate = TRUE,
                          info = TRUE,
                          columnDefs = list(list(className = 'dt-right', targets = "_all"))),
-          colnames = c("Asset", "Rank", "Rarity", "Num.</br>traits", "Traits"),
+          colnames = c("Asset", "Num.</br>traits", "Traits"),
           rownames = FALSE,
           escape = FALSE) %>%
   formatStyle(columns = 1:ncol(X), fontSize = '90%')
@@ -566,3 +528,7 @@ Tips would also be greatly appreciated! This would encourage me to maintain and 
 
 <!-- https://ionic.io/ionicons/v2/cheatsheet.html -->
 <!-- https://www.qrcode-monkey.com/#text -->
+
+
+<!-- To do -->
+<!-- - Added "none" to traits -->
