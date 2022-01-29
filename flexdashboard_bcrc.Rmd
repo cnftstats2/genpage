@@ -90,16 +90,12 @@ $(document).ready(function(){
 .data_date_now <- .data_dates[length(.data_dates)]
 .data_date_after <- .data_dates[!(.data_dates %in% .data_date_now)]
 .data_date_after_hours <- difftime(.data_date_now, .data_date_after, units = "hours")
-.enoughData <- ifelse(all(.data_date_after_hours < .hours_ago), FALSE, TRUE)
-
-if(!.enoughData) cat("Not enough data at the moment, please come back later.")
 
 # Find data date collection closest to one hour after the first data collection
 .data_date_next <- .data_date_after[which.min(abs(.data_date_after_hours - .hours_ago))]
 .diff_minutes_now_next <- difftime(.data_date_now, .data_date_next, units = "mins")
-```
 
-```{r eval=.enoughData, fig.height=7, fig.width=10}
+# Plot
 X <- DTE[data_date %in% c(.data_date_now, .data_date_next)]
 X[, data_when := fcase(
   data_date == .data_date_now, "Now",

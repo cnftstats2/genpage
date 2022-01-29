@@ -16,6 +16,8 @@ RAR <- readRDS("data/RAR_borgs.rds")
 
 
 # Functions ----------------------------------------------------------------------------------------
+extract_num <- function(x) as.numeric(regmatches(x, regexpr("[[:digit:]]+", x)))
+
 loj <- function (X = NULL, Y = NULL, onCol = NULL) {
   if (truelength(X) == 0 | truelength(Y) == 0) 
     stop("setDT(X) and setDT(Y) first")
@@ -32,7 +34,7 @@ query <- function(page, url, project, sold) {
     url = url, 
     body = list(
       search = "", 
-      types = c("listing", "offer"), 
+      types = c("listing", "offer", "bundle"),
       project = project, 
       sort = list(`_id` = -1L), 
       priceMin = NULL, 
@@ -57,25 +59,74 @@ query_n <- function(url, project, sold, n = "all") {
   out
 }
 
-CNFT <- query_n(api_link_cnft, project, sold = FALSE) |>
+.CNFT <- query_n(api_link_cnft, project, sold = FALSE) |>
   lapply(data.table) |> rbindlist(fill = TRUE)
 
-CNFT <- CNFT[asset.policyId == policy_id]
-CNFT[, asset        := asset.metadata.name]
-CNFT[, link         := paste0("https://cnft.io/token/", X_id)]
-CNFT[, asset_number := as.numeric(gsub("Borg #", "", asset))]
+
+.CNFTS <- query_n(api_link_cnft, project, sold = TRUE, n = 50) |>
+  lapply(data.table) |> rbindlist(fill = TRUE)
+
+.CNFT[, link := paste0("https://cnft.io/token/", ifelse(is.na(X_id), `_id`, X_id))]
+
+# Initialize data.table
+CNFT <- data.table(asset = NA, asset_number = NA, type = NA, price = NA,
+                   last_offer = NA, sc = NA, market = NA, link = NA)
+
+for (i in 1:nrow(.CNFT)) {
+  CNFT <- rbind(CNFT, data.table(asset        = .CNFT[i, assets[[1]]$metadata$name],
+                                 asset_number = as.numeric(NA),
+                                 type         = .CNFT[i, type],
+                                 price        = .CNFT[i, price],
+                                 last_offer   = .CNFT[i, offers],
+                                 sc           = .CNFT[i, smartContractTxid],
+                                 market       = "cnft.io",
+                                 link         = .CNFT[i, link]))
+}
+
+CNFT <- CNFT[2:nrow(CNFT)] # Clear first row from initialization
+CNFT[, asset_number := extract_num(asset)]
 CNFT[, price        := price/10**6]
-CNFT[, sc           := ifelse(is.na(smartContractTxid), "no", "yes")]
-CNFT[, market       := "cnft.io"]
+CNFT[, sc           := ifelse(is.na(sc), "no", "yes")]
 
 for (i in 1:nrow(CNFT)) {
-  .offers <- CNFT[i, offers[[1]]]
-  if (nrow(.offers) == 0) CNFT[i, last_offer := 0]
-  if (nrow(.offers) > 0) CNFT[i, last_offer := max(.offers$offer/10**6)]
+  .offers <- CNFT[i, last_offer[[1]]]
+  if (nrow(.offers) == 0) {
+    CNFT[i, last_offer := NA]
+  } else {
+    CNFT[i, last_offer := max(.offers$offer/10**6)]
+  }
 }
-CNFT[type == "listing", last_offer := NA]
 
-CNFT <- CNFT[, .(asset, asset_number, type, price, last_offer, sc, market, link)]
+
+# CNFT sales ---------------------------------------------------------------------------------------
+.CNFTS <- query_n(api_link_cnft, project, sold = TRUE, n = 11) |>
+  lapply(data.table) |> rbindlist(fill = TRUE)
+
+.CNFTS <- .CNFTS[!is.na(soldAt)]
+
+# Initialize data.table
+CNFTS <- data.table(asset = NA, asset_number = NA, price = NA,
+                    market = NA, sold_at = NA)
+
+for (i in 1:nrow(.CNFTS)) {
+  CNFTS <- rbind(CNFTS, data.table(asset        = .CNFTS[i, assets[[1]]$metadata$name],
+                                   asset_number = as.numeric(NA),
+                                   price        = .CNFTS[i, price],
+                                   market       = "cnft.io",
+                                   sold_at      = .CNFTS[i, soldAt]))
+}
+
+CNFTS <- CNFTS[2:nrow(CNFTS)] # Clear first row from initialization
+CNFTS[, asset_number  := extract_num(asset)]
+CNFTS[, price         := price/10**6]
+CNFTS[, market        := "cnft.io"]
+CNFTS[, sold_at       := as_datetime(sold_at)]
+CNFTS[, sold_at_hours := difftime(time_now, sold_at, units = "hours")]
+CNFTS[, sold_at_days  := difftime(time_now, sold_at, units = "days")]
+
+CNFTS <- CNFTS[order(-sold_at), .(asset, asset_number, price, sold_at, sold_at_hours, 
+                                  sold_at_days, market)]
+CNFTS <- CNFTS[sold_at_hours <= 24*3]
 
 
 # CNFT sales ---------------------------------------------------------------------------------------
