@@ -6,13 +6,14 @@ library(tidyr)
 library(httr)
 
 # Variables ----------------------------------------------------------------------------------------
-policy_id <- "c56d4cceb8a8550534968e1bf165137ca41e908d2d780cc1402079bd"
-project <- "ChilledKongs"
+policy_id <- "dac355946b4317530d9ec0cb142c63a4b624610786c2a32137d78e25"
+project <- "The ADApes Society"
+project_label <- "adapes"
 time_now <- as_datetime(now())
 
 
 # Databases ----------------------------------------------------------------------------------------
-RAR <- readRDS("data/RAR_chilledkongs.rds")
+RAR <- readRDS(sprintf("data/RAR_%s.rds", project_label))
 
 
 # Functions ----------------------------------------------------------------------------------------
@@ -62,25 +63,26 @@ query_n <- function(url, project, sold, n = "all") {
 .CNFT <- query_n(api_link_cnft, project, sold = FALSE) |>
   lapply(data.table) |> rbindlist(fill = TRUE)
 
-.CNFT[, link := paste0("https://cnft.io/token/", ifelse(is.na(X_id), `_id`, X_id))]
+
+.CNFT[, link := paste0("https://cnft.io/token/", `_id`)]
 
 # Initialize data.table
 CNFT <- data.table(asset = NA, asset_number = NA, type = NA, price = NA,
                    last_offer = NA, sc = NA, market = NA, link = NA)
 
 for (i in 1:nrow(.CNFT)) {
-  CNFT <- rbind(CNFT, data.table(asset        = .CNFT[i, assets[[1]]$metadata$name],
-                                 asset_number = as.numeric(NA),
-                                 type         = .CNFT[i, type],
-                                 price        = .CNFT[i, price],
-                                 last_offer   = .CNFT[i, offers],
-                                 sc           = .CNFT[i, smartContractTxid],
-                                 market       = "cnft.io",
-                                 link         = .CNFT[i, link]))
+  CNFT <- rbindlist(list(CNFT, data.table(asset        = .CNFT[i, assets[[1]]$metadata$name],
+                                          asset_number = as.numeric(NA),
+                                          type         = .CNFT[i, type],
+                                          price        = .CNFT[i, price],
+                                          last_offer   = .CNFT[i, offers],
+                                          sc           = .CNFT[i, smartContractTxid],
+                                          market       = "cnft.io",
+                                          link         = .CNFT[i, link])), fill = TRUE)
 }
 
 CNFT <- CNFT[2:nrow(CNFT)] # Clear first row from initialization
-CNFT[, asset_number := extract_num(asset)]
+CNFT[, asset_number := NA]
 CNFT[, price        := price/10**6]
 CNFT[, sc           := ifelse(is.na(sc), "no", "yes")]
 
@@ -105,15 +107,15 @@ CNFTS <- data.table(asset = NA, asset_number = NA, price = NA,
                     market = NA, sold_at = NA)
 
 for (i in 1:nrow(.CNFTS)) {
-  CNFTS <- rbind(CNFTS, data.table(asset        = .CNFTS[i, assets[[1]]$metadata$name],
-                                   asset_number = as.numeric(NA),
-                                   price        = .CNFTS[i, price],
-                                   market       = "cnft.io",
-                                   sold_at      = .CNFTS[i, soldAt]))
+  CNFTS <- rbindlist(list(CNFTS, data.table(asset        = .CNFTS[i, assets[[1]]$metadata$name],
+                                            asset_number = as.numeric(NA),
+                                            price        = .CNFTS[i, price],
+                                            market       = "cnft.io",
+                                            sold_at      = .CNFTS[i, soldAt])), fill = TRUE)
 }
 
 CNFTS <- CNFTS[2:nrow(CNFTS)] # Clear first row from initialization
-CNFTS[, asset_number  := extract_num(asset)]
+CNFTS[, asset_number  := NA]
 CNFTS[, price         := price/10**6]
 CNFTS[, market        := "cnft.io"]
 CNFTS[, sold_at       := as_datetime(sold_at)]
@@ -134,8 +136,8 @@ api_link <- sprintf("jpg.store/api/policy/%s/listings", policy_id)
 JPG <- data.table(fromJSON(rawToChar(GET(api_link)$content)))
 JPG[, link         := paste0("https://www.jpg.store/asset/", asset)]
 JPG[, price        := price_lovelace]
-JPG[, asset        := gsub("ChilledKong", "Chilled Kong #", asset_display_name)]
-JPG[, asset_number := as.numeric(gsub("Chilled Kong #", "", asset))]
+JPG[, asset        := asset_display_name]
+JPG[, asset_number := extract_num(asset)]
 JPG[, price        := price/10**6]
 JPG[, sc           := "yes"]
 JPG[, market       := "jpg.store"]
@@ -148,8 +150,8 @@ api_link <- sprintf("jpg.store/api/policy/%s/sales", policy_id)
 
 JPGS <- data.table(fromJSON(rawToChar(GET(api_link)$content)))
 JPGS[, price         := price_lovelace]
-JPGS[, asset         := gsub("ChilledKong", "Chilled Kong #", asset_display_name)]
-JPGS[, asset_number  := as.numeric(gsub("Chilled Kong #", "", asset))]
+JPGS[, asset         := asset_display_name]
+JPGS[, asset_number  := extract_num(asset)]
 JPGS[, price         := price/10**6]
 JPGS[, market        := "jpg.store"]
 JPGS[, sold_at       := as_datetime(purchased_at)]
@@ -172,13 +174,23 @@ DTS <- rbindlist(list(CNFTS, JPGS), fill = TRUE, use.names = TRUE)
 DT[, data_date := time_now]
 DTS[, data_date := time_now]
 
-
 # Rarity and ranking -------------------------------------------------------------------------------
+# Fix for merge
+DT[, asset_name := paste0("adape", asset)]
+DT[, asset_name := gsub(" ", "", asset_name)]
+DT[, asset_name := gsub("'", "", asset_name)]
+DT[asset_name == "adapeNA", asset_name := NA]
+
+DTS[, asset_name := paste0("adape", asset)]
+DTS[, asset_name := gsub(" ", "", asset_name)]
+DTS[, asset_name := gsub("'", "", asset_name)]
+DTS[asset_name == "adapeNA", asset_name := NA]
+
 setDT(DT); setDT(RAR)
-loj(DT, RAR, "asset_number")
+loj(DT, RAR, "asset_name")
 
 setDT(DTS); setDT(RAR)
-loj(DTS, RAR, "asset_number")
+loj(DTS, RAR, "asset_name")
 
 DT[, rank_range := fcase(asset_rank %between% c(1, 100), "1-100",
                          asset_rank %between% c(101, 250), "101-250",
@@ -243,8 +255,6 @@ DTS[, rank_range := fcase(asset_rank %between% c(1, 100), "1-100",
                         "9001-9999"))]
 
 
-
-
 # Large format -------------------------------------------------------------------------------------
 .cols <- names(DT)[names(DT) %like% "asset_trait_"]
 DTL <- data.table(gather(DT, key, value, all_of(.cols)))
@@ -262,10 +272,11 @@ saveRDS(DTS, file = "data/DTS.rds")
 
 # Database evolution -------------------------------------------------------------------------------
 DTE <- copy(DT)
-if (file.exists("data/DTE_chilledkongs.rds")) {
-  cat("File data/DTE exists:", file.exists("data/DTE_chilledkongs.rds"), "\n")
-  DTE_old <- readRDS("data/DTE_chilledkongs.rds")
+.file_name <- sprintf("data/DTE_%s.rds", project_label)
+if (file.exists(.file_name)) {
+  cat("File data/DTE exists:", file.exists(.file_name), "\n")
+  DTE_old <- readRDS(.file_name)
   DTE <- rbindlist(list(DTE, DTE_old), fill = TRUE)
   DTE <- DTE[difftime(time_now, data_date, units = "hours") <= 24] # Only retain last 24 hours
 }
-saveRDS(DTE, file = "data/DTE_chilledkongs.rds")
+saveRDS(DTE, file = .file_name)

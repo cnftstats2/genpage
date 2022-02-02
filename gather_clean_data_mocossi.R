@@ -64,9 +64,6 @@ query_n <- function(url, project, sold, n = "all") {
   lapply(data.table) |> rbindlist(fill = TRUE)
 
 
-.CNFTS <- query_n(api_link_cnft, project, sold = TRUE, n = 50) |>
-  lapply(data.table) |> rbindlist(fill = TRUE)
-
 .CNFT[, link := paste0("https://cnft.io/token/", ifelse(is.na(X_id), `_id`, X_id))]
 
 # Initialize data.table
