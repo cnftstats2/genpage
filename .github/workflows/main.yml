@@ -45,6 +45,8 @@ jobs:
         rmarkdown::render('flexdashboard_chilledkongs.Rmd', output_file = 'chilledkongs.html')
         source('gather_clean_data_borgs.R')
         rmarkdown::render('flexdashboard_borgs.Rmd', output_file = 'borgs.html')
+        source('gather_clean_data_adapes.R')
+        rmarkdown::render('flexdashboard_adapes.Rmd', output_file = 'adapes.html')
         source('gather_clean_data_bcrc.R')
         rmarkdown::render('flexdashboard_bcrc.Rmd', output_file = 'bcrc.html')
       shell: Rscript {0}
@@ -53,7 +55,7 @@ jobs:
       uses: GuillaumeFalourd/git-commit-push@v1.3
       with:
         target_branch: main
-        files: bcrc.html mocossi.html sac.html chilledkongs.html borgs.html
+        files: bcrc.html mocossi.html sac.html chilledkongs.html borgs.html adapes.html
         remote_repository: https://github.com/cnftstats/cnftstats.github.io
         access_token: ${{ secrets.API_TOKEN_GITHUB }}
         force: true
