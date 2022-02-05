@@ -39,14 +39,14 @@ jobs:
       run: |
         source('gather_clean_data_mocossi.R')
         rmarkdown::render('flexdashboard_mocossi.Rmd', output_file = 'mocossi.html')
-        source('gather_clean_data_sac.R')
-        rmarkdown::render('flexdashboard_sac.Rmd', output_file = 'sac.html')
+        source('gather_clean_data_spacebudz.R')
+        rmarkdown::render('flexdashboard_spacebudz.Rmd', output_file = 'spacebudz.html')
         source('gather_clean_data_chilledkongs.R')
         rmarkdown::render('flexdashboard_chilledkongs.Rmd', output_file = 'chilledkongs.html')
         source('gather_clean_data_borgs.R')
         rmarkdown::render('flexdashboard_borgs.Rmd', output_file = 'borgs.html')
         source('gather_clean_data_adapes.R')
-        rmarkdown::render('flexdashboard_adapes.Rmd', output_file = 'adapes.html')
+        rmarkdown::render('flexdashboard_bcrc.Rmd', output_file = 'adapes.html')
         source('gather_clean_data_bcrc.R')
         rmarkdown::render('flexdashboard_bcrc.Rmd', output_file = 'bcrc.html')
       shell: Rscript {0}
@@ -55,7 +55,7 @@ jobs:
       uses: GuillaumeFalourd/git-commit-push@v1.3
       with:
         target_branch: main
-        files: bcrc.html mocossi.html sac.html chilledkongs.html borgs.html adapes.html
+        files: bcrc.html mocossi.html chilledkongs.html borgs.html adapes.html spacebudz.html
         remote_repository: https://github.com/cnftstats/cnftstats.github.io
         access_token: ${{ secrets.API_TOKEN_GITHUB }}
         force: true
@@ -65,7 +65,7 @@ jobs:
       run: |
         git config --local user.name actions-user
         git config --local user.email "actions@github.com"
-        git add data/DTE_bcrc.rds data/DTE_chilledkongs.rds data/DTE_sac.rds data/DTE_borgs.rds data/DTE_adapes.rds
+        git add data/DTE_bcrc.rds data/DTE_chilledkongs.rds data/DTE_borgs.rds data/DTE_adapes.rds data/DTE_spacebudz.rds
         git commit -am "DTE updated $(date)"
         git push origin
       env:
