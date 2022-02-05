@@ -46,7 +46,7 @@ jobs:
         source('gather_clean_data_borgs.R')
         rmarkdown::render('flexdashboard_borgs.Rmd', output_file = 'borgs.html')
         source('gather_clean_data_adapes.R')
-        rmarkdown::render('flexdashboard_bcrc.Rmd', output_file = 'adapes.html')
+        rmarkdown::render('flexdashboard_adapes.Rmd', output_file = 'adapes.html')
         source('gather_clean_data_bcrc.R')
         rmarkdown::render('flexdashboard_bcrc.Rmd', output_file = 'bcrc.html')
       shell: Rscript {0}
