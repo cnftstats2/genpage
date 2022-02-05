@@ -35,6 +35,8 @@ RAR <- readRDS("data/RAR_bcrc.rds")
 DTS <- readRDS("data/DTS.rds")
 DTE <- readRDS("data/DTE_bcrc.rds")
 
+print(names(DTL))
+
 img_link <- "https://raw.githubusercontent.com/cnftstats/images/main/bcrc/BCRC"
 
 # javascript (clickable datapoints url)

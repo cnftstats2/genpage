@@ -248,6 +248,7 @@ DTL[, trait          := gsub("^ ", "", trait), 1:nrow(DTL)]
 
 DTL[, trait_category_and_trait := paste0(trait_category, "_", trait)]
 
+print(names(DTL))
 
 # Save ---------------------------------------------------------------------------------------------
 saveRDS(DT, file = "data/DT.rds")
