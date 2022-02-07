@@ -385,7 +385,8 @@ X <- X[, .(rank_range, img, price, asset_rank, market)]
 X <- X[complete.cases(X)]
 
 datatable(X, class = 'compact stripe hover',
-          options = list(pageLength = 100,
+          options = list(dom = "t",
+                         pageLength = 100,
                          scrollY = '100%',
                          bLengthChange = FALSE,
                          bPaginate = FALSE,

@@ -239,7 +239,7 @@ datatable(X, class = 'compact stripe hover nowrap',
 
 # Rank {data-icon="fa-signal"}
 ## Column 1 {data-width=650, .tabset}
-### Linear scale
+### Listings
 ```{r fig.height=7, fig.width=10}
 max_y <- max(DT[, quantile(price, probs = .90)], DTS[, max(price)])
 X <- DT[price <= max_y]
