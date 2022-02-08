@@ -64,7 +64,7 @@ query_n <- function(url, project, sold, n = "all") {
   lapply(data.table) |> rbindlist(fill = TRUE)
 
 
-.CNFT[, link := paste0("https://cnft.io/token/", `_id`)]
+.CNFT[, link := paste0("https://cnft.io/token/", ifelse(is.na(X_id), `_id`, X_id))]
 
 # Initialize data.table
 CNFT <- data.table(asset = NA, asset_number = NA, type = NA, price = NA,
