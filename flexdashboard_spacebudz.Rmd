@@ -112,8 +112,7 @@ data_when_order <- X[order(-data_date), unique(data_when)]
 X[, data_when := factor(data_when, levels = data_when_order)]
 
 X[price %between% c(0,     2999),  price_range := trunc(price/100)*100]
-X[price %between% c(3000,  4999),  price_range := trunc(price/500)*500]
-X[price %between% c(5000,  9999),  price_range := trunc(price/1000)*1000]
+X[price %between% c(3000,  9999),  price_range := trunc(price/500)*500]
 X[price %between% c(10000, 24999), price_range := trunc(price/5000)*5000]
 X[price >= 25000,                  price_range := 25000]
 X <- X[complete.cases(price_range), .(price_range, price, market, data_when)]
@@ -128,8 +127,7 @@ CAP <- X[, .(floor = min(price), listings = .N), data_when]
 
 X <- X[, .N, .(price_range, market, data_when)][order(price_range)]
 X[price_range %between% c(0,     2999),  x_label := paste0(price_range, "-", price_range + (100-1))]
-X[price_range %between% c(3000,  4999),  x_label := paste0(price_range, "-", price_range + (500-1))]
-X[price_range %between% c(5000,  9999),  x_label := paste0(price_range, "-", price_range + (1000-1))]
+X[price_range %between% c(3000,  9999),  x_label := paste0(price_range, "-", price_range + (500-1))]
 X[price_range %between% c(10000, 24999), x_label := paste0(price_range, "-", price_range + (5000-1))]
 X[price_range >= 25000,                  x_label := "25000+"]
 
@@ -168,8 +166,7 @@ X[, sold_time := fcase(trunc(sold_at_days) == 0, "0-24h ago",
                        trunc(sold_at_days) == 1, "24-48h ago",
                        trunc(sold_at_days) == 2, "48-72h ago")]
 X[price %between% c(0,     2999),  price_range := trunc(price/100)*100]
-X[price %between% c(3000,  4999),  price_range := trunc(price/500)*500]
-X[price %between% c(5000,  9999),  price_range := trunc(price/1000)*1000]
+X[price %between% c(3000,  9999),  price_range := trunc(price/500)*500]
 X[price %between% c(10000, 24999), price_range := trunc(price/5000)*5000]
 X[price >= 25000,                  price_range := 25000]
 X <- X[complete.cases(price_range), .(price_range, price, market, sold_time)]
@@ -183,8 +180,7 @@ CAP <- X[, .(sale_range = sprintf("%s-%s", min(price), max(price)),
 
 X <- X[, .N, .(price_range, market, sold_time)][order(price_range)]
 X[price_range %between% c(0,     2999),  x_label := paste0(price_range, "-", price_range + (100-1))]
-X[price_range %between% c(3000,  4999),  x_label := paste0(price_range, "-", price_range + (500-1))]
-X[price_range %between% c(5000,  9999),  x_label := paste0(price_range, "-", price_range + (1000-1))]
+X[price_range %between% c(3000,  9999),  x_label := paste0(price_range, "-", price_range + (500-1))]
 X[price_range %between% c(10000, 24999), x_label := paste0(price_range, "-", price_range + (5000-1))]
 X[price_range >= 25000,                  x_label := "25000+"]
 
