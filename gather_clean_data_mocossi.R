@@ -175,6 +175,10 @@ DTS <- rbindlist(list(CNFTS, JPGS), fill = TRUE, use.names = TRUE)
 DT[, data_date := time_now]
 DTS[, data_date := time_now]
 
+# Remove other Mocossi collections
+DT <- DT[!asset %like% "Christmas|Collectible"]
+DTS <- DTS[!asset %like% "Christmas|Collectible"]
+
 
 # Rarity and ranking -------------------------------------------------------------------------------
 setDT(DT); setDT(RAR)
