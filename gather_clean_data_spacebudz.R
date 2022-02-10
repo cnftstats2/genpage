@@ -164,9 +164,24 @@ JPGS <- JPGS[order(-sold_at), .(asset, asset_number, price, sold_at, sold_at_hou
 JPGS <- JPGS[sold_at_hours <= 24*3]
 
 
+# SpaceBudz.io listings ----------------------------------------------------------------------------
+api_link <- "https://spacebudz.io/api/offers"
+
+SB <- data.table(fromJSON(rawToChar(GET(api_link)$content))$offers)
+
+SB[, asset_number := as.numeric(budId)]
+SB[, link         := paste0("https://spacebudz.io/explore/spacebud/", asset_number)]
+SB[, price        := offer.amount/10**6]
+SB[, asset        := paste0("SpaceBud #", asset_number)]
+SB[, sc           := "yes"]
+SB[, market       := "spacebudz.io"]
+
+SB <- SB[, .(asset, asset_number, type = "listing", price, last_offer = NA, sc, market, link)]
+
+
 # Merge markets data -------------------------------------------------------------------------------
 # Listings
-DT <- rbindlist(list(CNFT, JPG), fill = TRUE, use.names = TRUE)
+DT <- rbindlist(list(CNFT, JPG, SB), fill = TRUE, use.names = TRUE)
 
 # Sales
 DTS <- rbindlist(list(CNFTS, JPGS), fill = TRUE, use.names = TRUE)

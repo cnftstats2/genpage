@@ -135,7 +135,7 @@ X[price_range >= 25000,                  x_label := "25000+"]
 
 .X <- X[, .(price_range, x_label)] %>% unique %>% .[order(price_range)]
 X[, x_label := factor(x_label, levels = .X$x_label)]
-X[, market  := factor(market, levels = c("jpg.store", "cnft.io"))]
+X[, market  := factor(market, levels = c("spacebudz.io", "jpg.store", "cnft.io"))]
 
 ggplot(X, aes(x_label, N, fill = market, alpha = data_when)) +
   facet_grid(data_when~.) +
@@ -143,7 +143,8 @@ ggplot(X, aes(x_label, N, fill = market, alpha = data_when)) +
   geom_text(aes(label = stat(y), group = x_label),
             stat = 'summary', fun = sum, vjust = -.5, hjust = +.55,
             color = "steelblue4", size = 3) +
-  scale_fill_manual(values = c("jpg.store" = "steelblue3", "cnft.io" = "steelblue4")) +
+  scale_fill_manual(values = c("spacebudz.io" = "steelblue1",
+                               "jpg.store" = "steelblue3", "cnft.io" = "steelblue4")) +
   scale_alpha_manual(values = c(0.9, 0.7), guide = "none") +
   labs(x = "Price range", y = "Number of listings", fill = "", caption = .caption) +
   theme_minimal() +
@@ -383,7 +384,7 @@ Tips would also be greatly appreciated! This would encourage me to maintain and 
 ## Columun 1
 ### About the website
 #### The data
-- Listings data is comes from <a href="https://cnft.io/" target="_blank">cnft.io</a> and <a href="https://www.jpg.store/" target="_blank">jpg.store</a> marketplaces.
+- Listings data is comes from <a href="https://cnft.io/" target="_blank">cnft.io</a>, <a href="https://www.jpg.store/" target="_blank">jpg.store</a>, <a href="https://spacebudz.io/" target="_blank">spacebudz.io</a> marketplaces.
 - Rank and rarity scores come from <a href="https://cnft.tools/" target="_blank">cnft.tools</a>.
 - The website is updated every ~10mins (expect for the Pavia projects which takes more time). You need to hit `F5` to manually see the updates on the website.
 
