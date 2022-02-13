@@ -71,14 +71,14 @@ $(document).ready(function(){
 
 # Sidebar {data-width=80, .sidebar}
 <ul id="sidebar_ul">
-  <li><a href="https://cnftstats.github.io/adapes.html">Adapes</a></li>
-  <li><a href="https://cnftstats.github.io/bcrc.html">BCRC</a></li>
-  <li><a href="https://cnftstats.github.io/borgs.html">BorgsClub</a></li>
-  <li id="currentProject"><a href="https://cnftstats.github.io/chilledkongs.html">ChilledKongs</a></li>
+  <li><a href="https://cnftstats.github.io/adapes">Adapes</a></li>
+  <li><a href="https://cnftstats.github.io/bcrc">BCRC</a></li>
+  <li><a href="https://cnftstats.github.io/borgs">BorgsClub</a></li>
+  <li id="currentProject"><a href="https://cnftstats.github.io/chilledkongs">ChilledKongs</a></li>
   <li><a href="https://cnftstats.github.io/claynation">Clay Nation</a></li>
-  <li><a href="https://cnftstats.github.io/mocossi.html">Mocossi</a></li>
-  <li><a href="https://cnftstats.github.io/pavia.html">Pavia</a></li>
-  <li><a href="https://cnftstats.github.io/spacebudz.html">SpaceBudz</a></li>
+  <li><a href="https://cnftstats.github.io/mocossi">Mocossi</a></li>
+  <li><a href="https://cnftstats.github.io/pavia">Pavia</a></li>
+  <li><a href="https://cnftstats.github.io/spacebudz">SpaceBudz</a></li>
 </ul>
 
 # Floor {data-icon="ion-arrow-graph-up-right"}
@@ -306,41 +306,24 @@ Tips would also be greatly appreciated! This would encourage me to maintain and 
 ## Columun 1
 ### About the website
 #### The data
-- Listings data is comes from <a href="https://cnft.io/" target="_blank">cnft.io</a> and <a href="https://www.jpg.store/" target="_blank">jpg.store</a> marketplaces.
+- Data comes from <a href="https://cnft.io/" target="_blank">cnft.io</a>, <a href="https://www.jpg.store/" target="_blank">jpg.store</a> and <a href="https://www.spacebudz.io/" target="_blank">spacebudz.io</a> maket places.
 - Rank and rarity scores come from <a href="https://cnft.tools/" target="_blank">cnft.tools</a>.
 - The website is updated every ~10mins (expect for the Pavia projects which takes more time). You need to hit `F5` to manually see the updates on the website.
-
-#### Comming soon
-- Only the *listings* are currently analyzed, but the *sales* will be soon included
 
 #### Disclaimer
 - This is an early version, so there might be some bugs! Use at your own risk
 
 ## Columun 2
 ### Other useful websites
-#### Official websites
-- <a href="https://bosscatrocketclub.com/" target="_blank">bosscatrocketclub.com</a>
-- <a href="https://chilledkongs.com/" target="_blank">chilledkongs.com</a>
-- <a href="https://mocossi.com/" target="_blank">mocossi.com</a>
-- <a href="https://spaceapeclub.io/" target="_blank">spaceapeclub.io</a>
-- <a href="https://www.pavia.io/" target="_blank">pavia.io</a>
-
-#### General tools
 - <a href="https://opencnft.io/" target="_blank">opencnft.io</a>
 - <a href="https://cnft.tools/" target="_blank">cnft.tools</a>
 - <a href="https://www.cnftjungle.io/" target="_blank">cnftjungle.io</a>
 - <a href="https://www.belowfloor.io/" target="_blank">belowfloor.io</a>
-
-#### Specific tools
 - <a href="https://pavia.3dkiwi.io/" target="_blank">Pavia heatmap</a>
 
-
 ## Column 3
+### Changelog
 ### About me
 - I am passionate about crypto, (c)nfts, stats, and programming!
 - Hit me on discord: <a href="https://discord.com/users/K2#8332/" target="_blank">K2#8332</a>
 - Follow me on Twitter: <a href="https://twitter.com/cnftstats" target="_blank">@cnftstats</a>
-
-
-<!-- https://ionic.io/ionicons/v2/cheatsheet.html -->
-<!-- https://www.qrcode-monkey.com/#text -->
