@@ -39,8 +39,6 @@ jobs:
       run: |
         source('gather_clean_data_mocossi.R')
         rmarkdown::render('flexdashboard_mocossi.Rmd', output_file = 'mocossi.html')
-        source('gather_clean_data_spacebudz.R')
-        rmarkdown::render('flexdashboard_spacebudz.Rmd', output_file = 'spacebudz.html')
         source('gather_clean_data_chilledkongs.R')
         rmarkdown::render('flexdashboard_chilledkongs.Rmd', output_file = 'chilledkongs.html')
         source('gather_clean_data_borgs.R')
@@ -51,7 +49,7 @@ jobs:
       uses: GuillaumeFalourd/git-commit-push@v1.3
       with:
         target_branch: main
-        files: mocossi.html chilledkongs.html borgs.html spacebudz.html
+        files: mocossi.html chilledkongs.html borgs.html
         remote_repository: https://github.com/cnftstats/cnftstats.github.io
         access_token: ${{ secrets.API_TOKEN_GITHUB }}
         force: true
@@ -61,7 +59,7 @@ jobs:
       run: |
         git config --local user.name actions-user
         git config --local user.email "actions@github.com"
-        git add data/DTE_chilledkongs.rds data/DTE_borgs.rds data/DTE_spacebudz.rds
+        git add data/DTE_chilledkongs.rds data/DTE_borgs.rds
         git commit -am "DTE updated $(date)"
         git push origin
       env:
